@@ -26,7 +26,7 @@ static char* RemoveExt(const char* path) {
 
 static void ezImageSaveEx(ezImage *img, const char *path) {
     char *ext = FileExt(path);
-    size_t sizeOfData = img->w * img->h * 4 * sizeof(char);
+    size_t sizeOfData = img->w * img->h * 4 * sizeof(unsigned char);
     char *data = malloc(sizeOfData);
     for (int i = 0, x = 0; x < img->h; x++)
         for (int y = 0; y < img->w; y++) {
@@ -80,8 +80,8 @@ static ezImage* ezImageLoadFromPathEx(const char *path) {
     ezImage *result = ezImageNew(w, h);
     for (int x = 0; x < w; x++)
         for (int y = 0; y < h; y++) {
-            unsigned char *p = data + (x + w * y) * n;
-            ezImagePSet(result, x, y, RGBA(p[0], p[1], p[2], n == 4 ? p[3] : 255));
+            unsigned char *p = data + (x + w * y) * 4;
+            ezImagePSet(result, x, y, RGBA(p[0], p[1], p[2], p[3]));
         }
     if (data)
         free(data);
@@ -90,7 +90,7 @@ static ezImage* ezImageLoadFromPathEx(const char *path) {
 
 int main(int argc, const char *argv[]) {
     for (int i = 1; i < argc; i++) {
-        ezImage *a = ezImageLoadFromPath(argv[i]);
+        ezImage *a = ezImageLoadFromPathEx(argv[i]);
         ezImage *b = ezImageRotate(a, 90.f);
         ezImageFree(a);
         
