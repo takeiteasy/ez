@@ -442,7 +442,7 @@ void* ezEcsViewField(ezView *view, size_t index);
 #endif
 #endif // EZECS_HEADER
 
-#if defined(EZECS_IMPLEMENTATION)
+#if defined(EZECS_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
 #include <assert.h>
 #if defined(DEBUG)
 #include <stdio.h>

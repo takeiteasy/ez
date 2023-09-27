@@ -389,7 +389,7 @@ do {                                \
 #endif
 #endif // EZVECTOR_HEADER
 
-#if defined(EZVECTOR_IMPLEMENTATION)
+#if defined(EZVECTOR_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
 static void *__vector_growf(void *arr, int increment, int itemsize) {
     int dbl_cur = arr ? 2 * __vector_m(arr) : 0;
     int min_needed = ezVectorCount(arr) + increment;

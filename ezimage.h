@@ -94,7 +94,7 @@ int ezImageSave(ezImage *img, const char *path);
 #endif
 #endif // EZIMAGE_HEADER
 
-#if defined(EZIMAGE_IMPLEMENTATION)
+#if defined(EZIMAGE_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
 int RGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
     return ((unsigned int)a << 24) | ((unsigned int)r << 16) | ((unsigned int)g << 8) | b;
 }

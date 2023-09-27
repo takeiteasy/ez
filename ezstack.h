@@ -1,4 +1,4 @@
-/* ezstack.h - Simple double linked-list implementation
+/* ezstack.h - Simple double linked-list implementation (WIP)
    https://github.com/takeiteasy/
   
  The MIT License (MIT)
@@ -48,7 +48,7 @@ ezStackEntry* ezStackDrop(ezStack *stack);
 #endif
 #endif // EZSTACK_HEADER
 
-#if defined(EZSTACK_IMPLEMENTATION)
+#if defined(EZSTACK_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
 static ezStackEntry* NewStackEntry(int id, void *data, ezStackEntry *next, ezStackEntry *prev) {
     assert(data);
     ezStackEntry *entry = malloc(sizeof(ezStackEntry));

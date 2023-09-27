@@ -52,7 +52,7 @@ int ezRandomInt(ezRandom *r, int max);
 #endif
 #endif // EZRNG_HEADER
 
-#if defined(EZRNG_IMPLEMENTATION)
+#if defined(EZRNG_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
 ezRandom* ezRandomNew(unsigned int s) {
     ezRandom *r = malloc(sizeof(ezRandom));
     if (!s)

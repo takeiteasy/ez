@@ -243,7 +243,7 @@ float EaseElasticInOut(float t, float b, float c, float d);
 #endif
 #endif // EZMATH_HEADER
 
-#if defined(EZMATH_IMPLEMENTATION)
+#if defined(EZMATH_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
 #define X(W, H)                                                      \
     __MATRIX_T(W, H) __MATRIX_D(W, H, Identity)(void)                \
     {                                                                \

@@ -67,7 +67,7 @@ void ezContainerFree(ezContainer* tree);
 #endif
 #endif // EZCONTAINER_HEADER
 
-#if defined(EZCONTAINER_IMPLEMENTATION)
+#if defined(EZCONTAINER_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
 #include <assert.h>
 
 static unsigned int crc32_tab[] = {

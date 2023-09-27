@@ -2,7 +2,10 @@
 
 Single header libraries mostly aimed towards game development. Recently I found myself reusing several pieces of code and often losing track of which version was the latest. So I've compiled them into single-header format to keep track easier.
 
-Simple include the header and define ```EZ[NAME]_IMPLEMENTATION``` in one of your source files. There are no dependencies outside of the standard library unless otherwise stated.
+Simple include the header and define ```EZ[NAME]_IMPLEMENTATION``` (or just ```EZ_IMPLEMENTATION```) in one of your source files. There are no dependencies outside of the standard library unless otherwise stated.
+
+
+## Libraries
 
 | File              | Description                                                   | Define                         |
 | ----------------- | ------------------------------------------------------------- | ------------------------------ |
