@@ -46,7 +46,7 @@ typedef struct ezContainerEntry {
 
 typedef struct ezContainerTreeEntry {
     ezContainerEntry entry;
-    char* fp;
+    char* filePath;
 } ezContainerTreeEntry;
 
 typedef struct ezContainer {
@@ -190,9 +190,9 @@ ezContainer* ezContainerRead(const char* path) {
     tree->entries = malloc(header.numberOfFiles * sizeof(ezContainerTreeEntry));
     for (int i = 0; i < header.numberOfFiles; ++i) {
         fread(&tree->entries[i].entry, sizeof(ezContainerEntry), 1, tree->fh);
-        tree->entries[i].fp = malloc(tree->entries[i].entry.nameLength * sizeof(char));
-        fread(tree->entries[i].fp, tree->entries[i].entry.nameLength * sizeof(char), 1, tree->fh);
-        tree->entries[i].fp[tree->entries[i].entry.nameLength] = '\0';
+        tree->entries[i].filePath = malloc(tree->entries[i].entry.nameLength * sizeof(char));
+        fread(tree->entries[i].filePath, tree->entries[i].entry.nameLength * sizeof(char), 1, tree->fh);
+        tree->entries[i].filePath[tree->entries[i].entry.nameLength] = '\0';
     }
     fseek(tree->fh, 0, SEEK_END);
     tree->fileSize = ftell(tree->fh);
@@ -204,7 +204,7 @@ ezContainerEntry* ezContainerFind(ezContainer* tree, const char* path) {
     assert(tree);
     size_t path_len = strlen(path);
     for (int i = 0; i < tree->sizeOfEntries; ++i)
-        if (!strncmp(path, tree->entries[i].fp, path_len))
+        if (!strncmp(path, tree->entries[i].filePath, path_len))
             return &tree->entries[i].entry;
     return NULL;
 }
@@ -221,7 +221,7 @@ void ezContainerFree(ezContainer* tree) {
     assert(tree);
     fclose(tree->fh);
     for (int i = 0; i < tree->sizeOfEntries; ++i)
-        free(tree->entries[i].fp);
+        free(tree->entries[i].filePath);
     free(tree->entries);
     memset(tree, 0, sizeof(ezContainer));
     free(tree);
