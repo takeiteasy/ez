@@ -82,6 +82,9 @@ const char *UserPath(void);
 const char *CurrentDirectory(void);
 int SetCurrentDirectory(const char *path);
 const char *ResolvePath(const char *path);
+const char* FileExt(const char *path);
+const char* RemoveExt(const char* path);
+const char* FileName(const char *path);
 
 #if defined(__cplusplus)
 }
@@ -268,6 +271,29 @@ const char* ResolvePath(const char *path) {
             break;
     }
     return JoinPath(CurrentDirectory(), path);
+}
+
+const char* FileExt(const char *path) {
+    const char *dot = strrchr(path, '.');
+    return !dot || dot == path ? NULL : dot + 1;
+}
+
+const char* RemoveExt(const char* path) {
+    char *lastExt = strrchr(path, '.');
+    if (lastExt != NULL)
+        *lastExt = '\0';
+    return lastExt ? path : NULL;
+}
+
+const char* FileName(const char *path) {
+    int l = 0;
+    char *tmp = strstr(path, "/");
+    do {
+        l = strlen(tmp) + 1;
+        path = &path[strlen(path) - l + 2];
+        tmp = strstr(path, "/");
+    } while(tmp);
+    return RemoveExt(path);
 }
 
 #endif
