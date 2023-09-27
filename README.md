@@ -1,6 +1,24 @@
 # ez 
 
-Single header libraries mostly aimed towards game development.
+Single header libraries mostly aimed towards game development. Recently I found myself reusing several pieces of code and often losing track of which version was the latest. So I've compiled them into single-header format to keep track easier.
+
+Simple include the header and define ```EZ[NAME]_IMPLEMENTATION``` in one of your source files. There are no dependencies outside of the standard library unless otherwise stated.
+
+| File              | Description                                                   | Define                         |
+| ----------------- | ------------------------------------------------------------- | ------------------------------ |
+| **ezcontainer.h** | Simple immutable container format to save/load data from disk | **EZCONTAINER_IMPLEMENTATION** |
+| **ezecs.h**§      | Simple entity component system                                | **EZECS_IMPLEMENTATION**       |
+| **ezimage.h**     | Image manipulation, .png importing + exporting                | **EZIMAGE_IMPLEMENTATION**     |
+| **ezmath.h**\*    | Common math functions + types                                 | **EZMATH_IMPLEMENTATION**      |
+| **ezobjc.h**†     | Wrapper for ObjC runtime                                      | N/A                            |
+| **ezrng.h**       | Simple pseudo random number generation                        | **EZRNG_IMPLEMENTATION**       |
+| **ezstack.h**§    | Simple double linked-list implementation                      | **EZSTACK_IMPLEMENTATION**     |
+| **ezvector.h**‡   | Stretchy buffer implementation                                | **EZVECTOR_IMPLEMENTATION**    |
+
+* **\*** Relies on clang+gcc extensions, define -fenable-matrix when building
+* **†** Requires linking to external dependencies
+* **‡** Some functionality relies on clang+gcc
+* **§** Work in progress, expect massive changes
 
 ## LICENSE
 ```
