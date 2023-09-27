@@ -6,14 +6,14 @@ int main(int argc, const char* argv[]) {
     ezContainer *tree = ezContainerRead(argv[1]);
     
     ezContainerTreeEntry *e = NULL;
-    for (int i = 0; i < tree->n_entries; ++i) {
+    for (int i = 0; i < tree->sizeOfEntries; ++i) {
         e = &tree->entries[i];
         char buf[255];
         sprintf(buf, ".%s", strrchr(e->fp, '/'));
         
         unsigned char* data = ezContainerEntryRaw(tree, &e->entry);
         FILE* tmp = fopen(buf, "w");
-        fwrite(data, e->entry.f_sz * sizeof(unsigned char), 1, tmp);
+        fwrite(data, e->entry.fileSize * sizeof(unsigned char), 1, tmp);
         fclose(tmp);
         free(data);
     }
