@@ -30,8 +30,8 @@
  
  -------------------------------------------------------------------- */
 
-#ifndef ezimage_h
-#define ezimage_h
+#ifndef EZIMAGE_HEADER
+#define EZIMAGE_HEADER
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -59,7 +59,7 @@ int RgBA(int c, unsigned char g);
 int RGbA(int c, unsigned char b);
 int RGBa(int c, unsigned char a);
 
-typedef struct {
+typedef struct ezImage {
     int *buf, w, h;
 } ezImage;
 
@@ -92,7 +92,7 @@ int ezImageSave(ezImage *img, const char *path);
 #if defined(__cplusplus)
 }
 #endif
-#endif // ezimage_h
+#endif // EZIMAGE_HEADER
 
 #if defined(EZIMAGE_IMPLEMENTATION)
 int RGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
