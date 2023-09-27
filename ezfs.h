@@ -286,14 +286,14 @@ const char* RemoveExt(const char* path) {
 }
 
 const char* FileName(const char *path) {
-    int l = 0;
+    unsigned long l = 0;
     char *tmp = strstr(path, "/");
     do {
         l = strlen(tmp) + 1;
         path = &path[strlen(path) - l + 2];
         tmp = strstr(path, "/");
     } while(tmp);
-    return RemoveExt(path);
+    return path;
 }
 
 #endif
