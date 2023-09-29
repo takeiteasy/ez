@@ -67,6 +67,9 @@ ezRandom* ezRandomNew(unsigned int s) {
     return r;
 }
 
+#if defined(ROTL)
+#undef ROTL
+#endif
 #define ROTL(N, R) (((N) << (R)) | ((N) >> (32 - (R))))
 
 unsigned int ezRandomBits(ezRandom *r) {

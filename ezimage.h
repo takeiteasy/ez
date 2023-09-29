@@ -761,7 +761,7 @@ static void convert(int bypp, int w, int h, const unsigned char *src, int *dest,
 static void depalette(int w, int h, unsigned char *src, int *dest, int bipp, const unsigned char *plte, const unsigned char *trns, int trnsSize) {
     int x, y, c;
     unsigned char alpha;
-    int mask, len;
+    int mask = 0, len = 0;
 
     switch (bipp) {
         case 4:
@@ -1355,7 +1355,7 @@ int ezImageSave(ezImage *img, const char *path) {
     
     // Write back payload size.
     fseek(out, dataPos, SEEK_SET);
-    put32(&s, dataSize);
+    put32(&s, (unsigned int)dataSize);
     
     long err = ferror(out);
     fclose(out);

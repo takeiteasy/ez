@@ -80,7 +80,9 @@ extern "C" {
 #define U16Min ((uint16_t)0)
 #define U32Max ((uint32_t)0xFFFFFFFF)
 #define U32Min ((uint32_t)0)
+#if !defined(U64Max)
 #define U64Max ((uint64_t)0xFFFFFFFFFFFFFFFF)
+#endif
 #define U64Min ((uint64_t)0)
 #define S8Max ((int8_t)0x7F)
 #define S8Min ((int8_t)-1 - 0x7F)
@@ -88,8 +90,12 @@ extern "C" {
 #define S16Min ((int16_t)-1 - 0x7FFF)
 #define S32Max ((int132_t)0x7FFFFFFF)
 #define S32Min ((int32_t)-1 - 0x7FFFFFFF)
+#if !defined(S64Max)
 #define S64Max ((int64_t)0x7FFFFFFFFFFFFFFF)
+#endif
+#if !defined(S64Min)
 #define S64Min ((int64_t)-1 - 0x7FFFFFFFFFFFFFFF)
+#endif
 
 #define MATRIX_TYPES \
     X(2, 2)          \
@@ -627,8 +633,6 @@ void QuaternionToAxisAngle(Quaternion q, Vector3 *outAxis, float *outAngle) {
 }
 
 Quaternion QuaternionFromEuler(float pitch, float yaw, float roll) {
-    Quaternion result = { 0 };
-
     float x0 = cosf(pitch*0.5f);
     float x1 = sinf(pitch*0.5f);
     float y0 = cosf(yaw*0.5f);
