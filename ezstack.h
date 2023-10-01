@@ -52,6 +52,7 @@ ezStackEntry* ezStackDrop(ezStack *stack);
 static ezStackEntry* NewStackEntry(int id, void *data, ezStackEntry *next, ezStackEntry *prev) {
     assert(data);
     ezStackEntry *entry = malloc(sizeof(ezStackEntry));
+    entry->id   = id;
     entry->data = data;
     entry->next = next;
     entry->prev = prev;
