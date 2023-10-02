@@ -3,6 +3,12 @@
  
  Some functionality relies on Clang + GCC extensions.
  When building `-fenable-matrix` must be passed.
+
+ Acknowledgements:
+    - A lot of this was hand translated from raylib's raymath.h header
+      https://github.com/raysan5/raylib/blob/master/src/raymath.h (Zlib)
+ 
+ --------------------------------------------------------------------
  
  The MIT License (MIT)
 
