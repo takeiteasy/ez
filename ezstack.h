@@ -27,6 +27,7 @@ extern "C" {
 #endif
 
 #include <stdlib.h>
+#include <assert.h>
 
 typedef struct ezStackEntry {
     int id;

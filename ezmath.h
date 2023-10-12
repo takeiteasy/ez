@@ -43,6 +43,10 @@
 extern "C" {
 #endif
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdarg.h>
+#include <string.h>
 #include <math.h>
 
 #ifndef PI
@@ -80,29 +84,6 @@ extern "C" {
 #define Million(n) ((n)*1000000)
 #define Billion(n) ((n)*1000000000LL)
 
-#define U8Max ((uint8_t)0xFF)
-#define U8Min ((uint8_t)0)
-#define U16Max ((uint16_t)0xFFFF)
-#define U16Min ((uint16_t)0)
-#define U32Max ((uint32_t)0xFFFFFFFF)
-#define U32Min ((uint32_t)0)
-#if !defined(U64Max)
-#define U64Max ((uint64_t)0xFFFFFFFFFFFFFFFF)
-#endif
-#define U64Min ((uint64_t)0)
-#define S8Max ((int8_t)0x7F)
-#define S8Min ((int8_t)-1 - 0x7F)
-#define S16Max ((int16_t)0x7FFF)
-#define S16Min ((int16_t)-1 - 0x7FFF)
-#define S32Max ((int132_t)0x7FFFFFFF)
-#define S32Min ((int32_t)-1 - 0x7FFFFFFF)
-#if !defined(S64Max)
-#define S64Max ((int64_t)0x7FFFFFFFFFFFFFFF)
-#endif
-#if !defined(S64Min)
-#define S64Min ((int64_t)-1 - 0x7FFFFFFFFFFFFFFF)
-#endif
-
 #define MATRIX_TYPES \
     X(2, 2)          \
     X(3, 3)          \
@@ -127,13 +108,12 @@ MATRIX_TYPES
 #define __VEC_D(L, F) Vec##L##F
 #define X(L)                                                                    \
     typedef float __VEC_T(L) __attribute__((ext_vector_type(L)));               \
-    typedef __VEC_T(L) Vector##L;                                               \
     typedef int Vec##L##i __attribute__((ext_vector_type(L)));                  \
     __VEC_T(L) __VEC_D(L, Zero)(void);                                          \
     __VEC_T(L) __VEC_D(L, New)(float x, ...);                                   \
     void __VEC_D(L, Print)(__VEC_T(L) v);                                       \
     float __VEC_D(L, Sum)(__VEC_T(L) v);                                        \
-    bool __VEC_D(L, Equals)(__VEC_T(L) a, __VEC_T(L) b);                        \
+    int __VEC_D(L, Equals)(__VEC_T(L) a, __VEC_T(L) b);                         \
     float __VEC_D(L, LengthSqr)(__VEC_T(L) v);                                  \
     float __VEC_D(L, Length)(__VEC_T(L) v);                                     \
     float __VEC_D(L, Dot)(__VEC_T(L) v1, __VEC_T(L) v2);                        \
@@ -188,12 +168,12 @@ Quaternion QuaternionInvert(Quaternion q);
 Quaternion QuaternionFromVec3ToVec3(Vec3f from, Vec3f to);
 Quaternion QuaternionFromMatrix(Matrix mat);
 Matrix QuaternionToMatrix(Quaternion q);
-Quaternion QuaternionFromAxisAngle(Vector3 axis, float angle);
-void QuaternionToAxisAngle(Quaternion q, Vector3 *outAxis, float *outAngle);
+Quaternion QuaternionFromAxisAngle(Vec3f axis, float angle);
+void QuaternionToAxisAngle(Quaternion q, Vec3f *outAxis, float *outAngle);
 Quaternion QuaternionFromEuler(float pitch, float yaw, float roll);
-Vector3 QuaternionToEuler(Quaternion q);
+Vec3f QuaternionToEuler(Quaternion q);
 Quaternion QuaternionTransform(Quaternion q, Matrix mat);
-bool QuaternionEquals(Quaternion p, Quaternion q);
+int QuaternionEquals(Quaternion p, Quaternion q);
 
 float MatrixDetermint(Matrix mat);
 Matrix MatrixInvert(Matrix mat);
@@ -204,7 +184,7 @@ Matrix MatrixFrustum(float left, float right, float bottom, float top, float nea
 Matrix MatrixPerspective(float fovY, float aspect, float nearPlane, float farPlane);
 Matrix MatrixOrtho(float left, float right, float bottom, float top, float nearPlane, float farPlane);
 
-bool FloatCmp(float a, float b);
+int FloatCmp(float a, float b);
 int Min(int a, int b);
 int Max(int a, int b);
 int Clamp(int n, int min, int max);
@@ -291,6 +271,8 @@ float EaseElasticInOut(float t, float b, float c, float d);
 MATRIX_TYPES
 #undef X
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvarargs"
 #define X(L)                                                                   \
     __VEC_T(L) __VEC_D(L, Zero)(void)                                          \
     {                                                                          \
@@ -323,12 +305,12 @@ MATRIX_TYPES
             r += v[i];                                                         \
         return r;                                                              \
     }                                                                          \
-    bool __VEC_D(L, Equals)(__VEC_T(L) a, __VEC_T(L) b)                        \
+    int __VEC_D(L, Equals)(__VEC_T(L) a, __VEC_T(L) b)                         \
     {                                                                          \
-        bool r = true;                                                         \
+        int r = 1;                                                             \
         for (int i = 0; i < L; i++)                                            \
             if (!FloatCmp(a[i], b[i]))                                         \
-                return false;                                                  \
+                return 0;                                                      \
         return r;                                                              \
     }                                                                          \
     float __VEC_D(L, LengthSqr)(__VEC_T(L) v)                                  \
@@ -387,6 +369,7 @@ MATRIX_TYPES
     }
 VECTOR_TYPES
 #undef X
+#pragma clang diagnostic pop
 
 float Vec2Angle(Vec2f v1, Vec2f v2) {
     return atan2f(v2.y, v2.x) - atan2f(v1.y, v1.x);
@@ -472,9 +455,9 @@ Vec3f Vec3Transform(Vec3f v, Matrix mat) {
 }
 
 Vec3f Vec3Barycentre(Vec3f p, Vec3f a, Vec3f b, Vec3f c) {
-    Vector3 v0 = b - a;
-    Vector3 v1 = c - a;
-    Vector3 v2 = p - a;
+    Vec3f v0 = b - a;
+    Vec3f v1 = c - a;
+    Vec3f v2 = p - a;
     float d00 = Vec3Dot(v0, v1);
     float d01 = Vec3Dot(v1, v1);
     float d11 = Vec3Dot(v1, v1);
@@ -486,7 +469,7 @@ Vec3f Vec3Barycentre(Vec3f p, Vec3f a, Vec3f b, Vec3f c) {
     return (Vec3f) {1.0f - (z + y), y, z};
 }
 
-Vector3 Vec3Unproject(Vector3 source, Matrix projection, Matrix view) {
+Vec3f Vec3Unproject(Vec3f source, Matrix projection, Matrix view) {
     Quaternion p = QuaternionTransform((Quaternion){source.x, source.y, source.z, 1.f }, MatrixInvert(view * projection));
     return (Vec3f) {
         p.x / p.w,
@@ -610,7 +593,7 @@ Matrix QuaternionToMatrix(Quaternion q) {
     return result;
 }
 
-Quaternion QuaternionFromAxisAngle(Vector3 axis, float angle) {
+Quaternion QuaternionFromAxisAngle(Vec3f axis, float angle) {
     float axisLength = Vec3Length(axis);
     if (axisLength == 0.f)
         return QuaternionIdentity();
@@ -627,7 +610,7 @@ Quaternion QuaternionFromAxisAngle(Vector3 axis, float angle) {
     };
 }
 
-void QuaternionToAxisAngle(Quaternion q, Vector3 *outAxis, float *outAngle) {
+void QuaternionToAxisAngle(Quaternion q, Vec3f *outAxis, float *outAngle) {
     if (fabsf(q.w) > 1.0f)
         q = QuaternionNormalize(q);
     float resAngle = 2.0f*acosf(q.w);
@@ -654,7 +637,7 @@ Quaternion QuaternionFromEuler(float pitch, float yaw, float roll) {
     };
 }
 
-Vector3 QuaternionToEuler(Quaternion q) {
+Vec3f QuaternionToEuler(Quaternion q) {
     // Roll (x-axis rotation)
     float x0 = 2.0f*(q.w*q.x + q.y*q.z);
     float x1 = 1.0f - 2.0f*(q.x*q.x + q.y*q.y);
@@ -681,7 +664,7 @@ Quaternion QuaternionTransform(Quaternion q, Matrix mat) {
     };
 }
 
-bool QuaternionEquals(Quaternion p, Quaternion q) {
+int QuaternionEquals(Quaternion p, Quaternion q) {
     return (((fabsf(p.x - q.x)) <= (EPSILON*fmaxf(1.0f, fmaxf(fabsf(p.x), fabsf(q.x))))) && ((fabsf(p.y - q.y)) <= (EPSILON*fmaxf(1.0f, fmaxf(fabsf(p.y), fabsf(q.y))))) && ((fabsf(p.z - q.z)) <= (EPSILON*fmaxf(1.0f, fmaxf(fabsf(p.z), fabsf(q.z))))) && ((fabsf(p.w - q.w)) <= (EPSILON*fmaxf(1.0f, fmaxf(fabsf(p.w), fabsf(q.w)))))) || (((fabsf(p.x + q.x)) <= (EPSILON*fmaxf(1.0f, fmaxf(fabsf(p.x), fabsf(q.x))))) && ((fabsf(p.y + q.y)) <= (EPSILON*fmaxf(1.0f, fmaxf(fabsf(p.y), fabsf(q.y))))) && ((fabsf(p.z + q.z)) <= (EPSILON*fmaxf(1.0f, fmaxf(fabsf(p.z), fabsf(q.z))))) && ((fabsf(p.w + q.w)) <= (EPSILON*fmaxf(1.0f, fmaxf(fabsf(p.w), fabsf(q.w))))));
 }
 
@@ -834,7 +817,7 @@ Matrix MatrixLookAt(Vec3f eye, Vec3f target, Vec3f up) {
     return result;
 }
 
-bool FloatCmp(float a, float b) {
+int FloatCmp(float a, float b) {
     return (fabsf(a - b)) <= (EPSILON * fmaxf(1.0f, fmaxf(fabsf(a), fabsf(b))));
 }
 
