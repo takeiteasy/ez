@@ -4,3 +4,4 @@ build/
 *.plist
 *.o
 compile_commands.json
+a.out
