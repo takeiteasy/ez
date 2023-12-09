@@ -65,9 +65,9 @@ typedef ezArenaRegion Region;
 
 static void* MemAlloc(size_t size) {
 #if defined(ON_WINDOWS)
-    return (Region*)VirtualAlloc(NULL, size, MEM_RESERVE, PAGE_NOACCESS);
+    return VirtualAlloc(NULL, size, MEM_RESERVE, PAGE_NOACCESS);
 #else
-    return (Region*)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    return mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 #endif
 }
 
@@ -89,7 +89,7 @@ void ezArenaReset(ezArena *arena) {
 }
 
 void* ezArenaAlloc(ezArena *arena, size_t sizeOfMemory) {
-    Region *region = MemAlloc(sizeof(Region));
+    Region *region = (Region*)MemAlloc(sizeof(Region));
     region->memory = MemAlloc(sizeOfMemory);
     region->sizeOfMemory = sizeOfMemory;
 
