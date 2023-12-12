@@ -1,6 +1,6 @@
 /* ezecs.h -- Simple entity component system (WIP)
  https://github.com/takeiteasy/
- 
+
  The MIT License (MIT)
 
  Copyright (c) 2022 George Watson
@@ -172,7 +172,7 @@ typedef struct ezWorld ezWorld;
  * @param PARENT Parent entity
  * @param CB Query callback
  */
-#define ezEntityChildrenOf(WORLD, PARENT, CB) (ezEcsRelations((WORLD), (PARENT), ezEcsChildof, (CB)))
+#define ezEntityChildrenOf(WORLD, PARENT, CB) (ezEcsRelations((WORLD), (PARENT), ezEcsChildOf, (CB)))
 /*!
  * @defined ezEntityIsA
  * @abstract Check the type of an entity
@@ -240,7 +240,7 @@ typedef struct ezRelation {
     X(System, sizeof(ezSystem))     \
     X(Prefab, sizeof(ezPrefab))     \
     X(Relation, sizeof(ezRelation)) \
-    X(Childof, 0)
+    X(ChildOf, 0)
 
 #define X(NAME, _) extern ezEntity ezEcs##NAME;
 ECS_BOOTSTRAP
@@ -581,16 +581,16 @@ static void SparseEmplace(EcsSparse *sparse, ezEntity e) {
 static size_t SparseRemove(EcsSparse *sparse, ezEntity e) {
     ASSERT(sparse);
     ECS_ASSERT(SparseHas(sparse, e), Sparse, sparse);
-    
+
     const uint32_t id = ezEntityID(e);
     uint32_t pos = ezEntityID(sparse->sparse[id]);
     ezEntity other = sparse->dense[sparse->sizeOfDense-1];
-    
+
     sparse->sparse[ezEntityID(other)] = (ezEntity) { .parts = { .id = pos } };
     sparse->dense[pos] = other;
     sparse->sparse[id] = ezEcsNilEntity;
     sparse->dense = realloc(sparse->dense, --sparse->sizeOfDense * sizeof * sparse->dense);
-    
+
     return pos;
 }
 
@@ -674,11 +674,11 @@ ezWorld* ezEcsNewWorld(void) {
     ezWorld *result = malloc(sizeof(ezWorld));
     *result = (ezWorld){0};
     result->nextAvailableId = ezEcsNil;
-    
+
 #define X(NAME, SZ) ezEcs##NAME = ezEcsNewComponent(result, SZ);
     ECS_BOOTSTRAP
 #undef X
-    
+
     return result;
 }
 
@@ -775,7 +775,7 @@ ezEntity ezEcsNewSystem(ezWorld *world, ezSystemCb fn, size_t sizeOfComponents, 
     c->callback = fn;
     c->sizeOfComponents = sizeOfComponents;
     c->components = malloc(sizeof(ezEntity) * sizeOfComponents);
-    
+
     va_list args;
     va_start(args, sizeOfComponents);
     for (int i = 0; i < sizeOfComponents; i++)
@@ -790,7 +790,7 @@ ezEntity ezEcsNewPrefab(ezWorld *world, size_t sizeOfComponents, ...) {
     ezPrefab *c = ezEcsGet(world, e, ezEcsPrefab);
     c->sizeOfComponents = sizeOfComponents;
     c->components = malloc(sizeof(ezEntity) * sizeOfComponents);
-    
+
     va_list args;
     va_start(args, sizeOfComponents);
     for (int i = 0; i < sizeOfComponents; i++)
@@ -916,7 +916,7 @@ void ezEcsSet(ezWorld *world, ezEntity entity, ezEntity component, const void *d
     ECS_ASSERT(ezEcsIsValid(world, component), Entity, component);
     EcsStorage *storage = EcsFind(world, component);
     ASSERT(storage);
-    
+
     void *componentData = StorageHas(storage, entity) ?
                                     StorageGet(storage, entity) :
                                     StorageEmplace(storage, entity);
@@ -968,7 +968,7 @@ void ezEcsQuery(ezWorld *world, ezSystemCb cb, ezEntity *components, size_t size
         };
         for (size_t i = 0; i < sizeOfComponents; i++) {
             EcsStorage *storage = EcsFind(world, components[i]);
-            
+
             if (StorageHas(storage, world->entities[e])) {
                 view.sizeOfComponentData++;
                 view.componentData = realloc(view.componentData, view.sizeOfComponentData * sizeof(void*));
@@ -980,7 +980,7 @@ void ezEcsQuery(ezWorld *world, ezSystemCb cb, ezEntity *components, size_t size
                 break;
             }
         }
-        
+
         if (hasComponents)
             cb(&view);
         DestroyView(&view);
