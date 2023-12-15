@@ -1,4 +1,4 @@
-# ez 
+# ez
 
 Single header libraries mostly aimed towards game development. Recently I found myself reusing several pieces of code and often losing track of which version was the latest. So I've compiled them into single-header format to keep track easier.
 
@@ -9,6 +9,7 @@ Simple include the header and define ```EZ[NAME]_IMPLEMENTATION``` (or just ```E
 
 | File              | Description                                                   | Define                         |
 | ----------------- | ------------------------------------------------------------- | ------------------------------ |
+| **ezarena.h**     | Simple memory arena implementation using mmap+VirtualAlloc    | **EZARENA_IMPLEMENTATION**     |
 | **ezcontainer.h** | Simple immutable container format to save/load data from disk | **EZCONTAINER_IMPLEMENTATION** |
 | **ezecs.h**§      | Simple entity component system                                | **EZECS_IMPLEMENTATION**       |
 | **ezfs.h**§       | Common cross-platform file system functions                   | **EZFS_IMPLEMENTATION**        |
