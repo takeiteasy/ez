@@ -41,11 +41,11 @@ ezRandom* ezRandomNew(unsigned int s);
 unsigned int ezRandomBits(ezRandom *r);
 float ezRandomFloat(ezRandom *r);
 double ezRandomDouble(ezRandom *r);
-int ezRandomInt(ezRandom *r, int max);
+#define ezRandomInt(R, __MAX) (ezRandomBits((R)) % __MAX)
 
 #define ezRandomFloatRange(R, __MIN, __MAX) (ezRandomFloat((R)) * ((__MAX) - (__MIN)) + (__MIN))
 #define ezRandomDoubleRange(R, __MIN, __MAX) (ezRandomDouble((R)) * ((__MAX) - (__MIN)) + (__MIN))
-#define ezRandomIntRange(R, __MIN, __MAX) (ezRandomBits(r) % ((__MAX) + 1 - (__MIN)) + (__MIN))
+#define ezRandomIntRange(R, __MIN, __MAX) (ezRandomBits((R)) % ((__MAX) + 1 - (__MIN)) + (__MIN))
 
 #if defined(__cplusplus)
 }
