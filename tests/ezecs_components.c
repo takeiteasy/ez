@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
     ezWorld *world = ezEcsNewWorld();
     
     ezEntity e1 = ezEcsNewEntity(world);
-    ezEntity position = ezNewComponent(world, Position);
+    ezEntity position = EZ_COMPONENT(world, Position);
     ezEcsAttach(world, e1, position);
     ezEntity e2 = ezEcsNewEntity(world);
     ezEcsAttach(world, e2, position);
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
     TEST(ezEcsHas(world, e3, position), 0);
     TEST(ezEcsGet(world, e3, position), NULL);
     
-    ezEntity testTag = ezNewTag(world);
+    ezEntity testTag = EZ_TAG(world);
     ezEcsAttach(world, e1, testTag);
     TEST(ezEcsHas(world, e1, testTag), 1);
     TEST(ezEcsHas(world, e2, testTag), 0);

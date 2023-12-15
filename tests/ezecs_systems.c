@@ -22,14 +22,14 @@ typedef struct {
 
 static int posCbCounter = 0;
 static void posCb(ezView *view) {
-    TEST(!!ezViewField(view, Position, 0), 1);
+    TEST(!!EZ_FIELD(view, Position, 0), 1);
     posCbCounter++;
 }
 
 static int moveCbCounter = 0;
 static void moveCb(ezView *view) {
-    TEST(!!ezViewField(view, Position, 0), 1);
-    TEST(!!ezViewField(view, Velocity, 1), 1);
+    TEST(!!EZ_FIELD(view, Position, 0), 1);
+    TEST(!!EZ_FIELD(view, Velocity, 1), 1);
     moveCbCounter++;
 }
 
@@ -37,24 +37,24 @@ int main(int argc, const char *argv[]) {
     ezWorld *world = ezEcsNewWorld();
     
     ezEntity e1 = ezEcsNewEntity(world);
-    ezEntity position = ezNewComponent(world, Position);
+    ezEntity position = EZ_COMPONENT(world, Position);
     ezEcsAttach(world, e1, position);
     ezEntity e2 = ezEcsNewEntity(world);
     ezEcsAttach(world, e2, position);
     
-    ezEntity velocity = ezNewComponent(world, Velocity);
+    ezEntity velocity = EZ_COMPONENT(world, Velocity);
     ezEcsAttach(world, e2, position);
-    ezQuery(world, posCb, position);
+    EZ_QUERY(world, posCb, position);
     ezEcsAttach(world, e1, velocity);
-    ezQuery(world, moveCb, position, velocity);
+    EZ_QUERY(world, moveCb, position, velocity);
     TEST(posCbCounter, 2);
     TEST(moveCbCounter, 1);
     
     ezEntity e4 = ezEcsNewEntity(world);
     ezEcsAttach(world, e4, position);
     ezEcsAttach(world, e4, velocity);
-    ezEntity testSystemA = ezNewSystem(world, posCb, position);
-    ezEntity testSystemB = ezNewSystem(world, moveCb, position, velocity);
+    ezEntity testSystemA = EZ_SYSTEM(world, posCb, position);
+    ezEntity testSystemB = EZ_SYSTEM(world, moveCb, position, velocity);
     
     ezEcsStep(world);
     TEST(posCbCounter, 5);
@@ -65,15 +65,15 @@ int main(int argc, const char *argv[]) {
     TEST(posCbCounter, moveCbCounter);
     
     ezEntity e5 = ezEcsNewEntity(world);
-    ezEntity testPrefab = ezNewPrefab(world, position, velocity);
+    ezEntity testPrefab = EZ_PREFAB(world, position, velocity);
     ezEcsAttach(world, e5, testPrefab);
     TEST(ezEcsHas(world, e5, position), 1);
     TEST(ezEcsHas(world, e5, velocity), 1);
     
-    TEST(ezEntityIsA(testPrefab, Prefab), 1);
-    TEST(ezEntityIsA(testSystemB, System), 1);
-    TEST(ezEntityIsA(position, Component), 1);
-    TEST(ezEntityIsA(e5, Component), 0);
+    TEST(EZ_ENTITY_IS_A(testPrefab, Prefab), 1);
+    TEST(EZ_ENTITY_IS_A(testSystemB, System), 1);
+    TEST(EZ_ENTITY_IS_A(position, Component), 1);
+    TEST(EZ_ENTITY_IS_A(e5, Component), 0);
 
     ezEcsFreeWorld(&world);
     return EXIT_SUCCESS;

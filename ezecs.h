@@ -67,49 +67,49 @@ typedef union {
 } ezEntity;
 
 /*!
- * @defined ezEntityID
+ * @defined EZ_ENTITY_ID
  * @abstract Get ezEntity unique 32-bit id
  * @param E ezEntity object
  * @return 32-bit unique identifier
  */
-#define ezEntityID(E) \
+#define EZ_ENTITY_ID(E) \
     ((E).parts.id)
 /*!
- * @defined ezEntityVersion
+ * @defined EZ_ENTITY_VERSION
  * @abstract Get ezEntity object generation
  * @param E ezEntity object
  * @return ezEntity generation
  */
-#define ezEntityVersion(E) \
+#define EZ_ENTITY_VERSION(E) \
     ((E).parts.version)
 /*!
- * @defined ezEntityIsNil
+ * @defined EZ_ENTITY_IS_NIL
  * @abstract Check if given entity object is nil
  * @param E ezEntity object
  * @return boolean
  */
-#define ezEntityIsNil(E) \
-    ((E).parts.id == ezEcsNil)
+#define EZ_ENTITY_IS_NIL(E) \
+    ((E).parts.id == EZ_ECS_NIL)
 /*!
- * @defined ezEntityCompare
+ * @defined EZ_ENTITY_CMP
  * @abstract Compare to entity objects
  * @param A ezEntity object 1
  * @param B ezEntity object 2
  * @return boolean
  */
-#define ezEntityCompare(A, B) \
+#define EZ_ENTITY_CMP(A, B) \
     ((A).id == (B).id)
 
 /*!
- * @const ezEcsNil
+ * @defined EZ_ECS_NIL
  * @abstract Constatnt 32-bit denoting a nil entity
  */
-extern const uint64_t ezEcsNil;
+#define EZ_ECS_NIL 0xFFFFFFFFull
 /*!
- * @const ezEcsNilEntity
+ * @defined EZ_NIL_ENTITY
  * @abstract Constatnt ezEntity object denoting a nil entity
  */
-extern const ezEntity ezEcsNilEntity;
+#define EZ_NIL_ENTITY (ezEntity){.id=EZ_ECS_NIL}
 /*!
  * @typedef ezWorld
  * @abstract ECS Manager, holds all ECS data
@@ -117,92 +117,93 @@ extern const ezEntity ezEcsNilEntity;
 typedef struct ezWorld ezWorld;
 
 /*!
- * @defined ezNewComponent
+ * @defined EZ_COMPONENT
  * @abstract Convenience wrapper around ezEcsNewComponent
  * @param WORLD ezWorld instance
  * @param T Component type
  * @return Component entity object
  */
-#define ezNewComponent(WORLD, T) ezEcsNewComponent(WORLD, sizeof(T))
+#define EZ_COMPONENT(WORLD, T) ezEcsNewComponent(WORLD, sizeof(T))
 /*!
- * @defined ezNewTag
+ * @defined EZ_TAG
  * @abstract Convenience wrapper around ezEcsNewComponent (size param is zero)
  * @param WORLD ezWorld instance
  * @return Component entity object
  */
-#define ezNewTag(WORLD) ezEcsNewComponent(WORLD, 0)
+#define EZ_TAG(WORLD) ezEcsNewComponent(WORLD, 0)
 /*!
- * @defined ezQuery
+ * @defined EZ_QUERY
  * @abstract Convenience wrapper around ezEcsQuery
  * @param WORLD ezWorld instance
  * @param CB Query callback
  * @param ... List of components for query
  */
-#define ezQuery(WORLD, CB, ...) ezEcsQuery(WORLD, CB, (ezEntity[]){__VA_ARGS__}, sizeof((ezEntity[]){__VA_ARGS__}) / sizeof(ezEntity));
+#define EZ_QUERY(WORLD, CB, UD, ...) ezEcsQuery(WORLD, CB, UD, (ezEntity[]){__VA_ARGS__}, sizeof((ezEntity[]){__VA_ARGS__}) / sizeof(ezEntity));
 /*!
- * @defined ezViewField
- * @abstract Convenience wrapper around ezEcsViewField (For use in ezEcsQuery callbacks)
- * @param VIEW View object
+ * @defined EZ_FIELD
+ * @abstract Convenience wrapper around ezEcsQueryField (For use in ezEcsQuery callbacks)
+ * @param QUERY Query object
  * @param T Component type
- * @param IDX View component index
+ * @param IDX Query component index
  * @return Pointer to component data
  */
-#define ezViewField(VIEW, T, IDX) (T *)ezEcsViewField(VIEW, IDX)
+#define EZ_FIELD(QUERY, T, IDX) (T *)ezEcsQueryField(QUERY, IDX)
 /*!
- * @defined ezNewSystem
+ * @defined EZ_SYSTEM
  * @abstract Convenience wrapper around ezEcsNewSystem
  * @param WORLD Ecs World object
  * @param CB System callback
  * @param ... List of components
  * @return System entity object
  */
-#define ezNewSystem(WORLD, CB, ...) ezEcsNewSystem(WORLD, CB, N_ARGS(__VA_ARGS__), __VA_ARGS__)
+#define EZ_SYSTEM(WORLD, CB, ...) ezEcsNewSystem(WORLD, CB, N_ARGS(__VA_ARGS__), __VA_ARGS__)
 /*!
- * @defined ezNewPrefab
+ * @defined EZ_PREFAB
  * @abstract Convenience wrapper around ezEcsNewPrefab
  * @param WORLD ezWorld instance
  * @param ... List of components
  * @return Prefab entity object
  */
-#define ezNewPrefab(WORLD, ...) ezEcsNewPrefab(WORLD, N_ARGS(__VA_ARGS__), __VA_ARGS__)
+#define EZ_PREFAB(WORLD, ...) ezEcsNewPrefab(WORLD, N_ARGS(__VA_ARGS__), __VA_ARGS__)
 /*!
- * @defined ezEntityChildrenOf
+ * @defined EZ_ENTITY_IS_CHILD_OF
  * @abstract Convenience wrapper for EcsRelation to find all entities with relation of EcsChildOf
  * @param WORLD ezWorld instance
  * @param PARENT Parent entity
  * @param CB Query callback
  */
-#define ezEntityChildrenOf(WORLD, PARENT, CB) (ezEcsRelations((WORLD), (PARENT), ezEcsChildof, (CB)))
+#define EZ_ENTITY_IS_CHILD_OF(WORLD, PARENT, CB) (ezEcsRelations((WORLD), (PARENT), ezEcsChildof, (CB)))
 /*!
- * @defined ezEntityIsA
+ * @defined EZ_ENTITY_IS_A
  * @abstract Check the type of an entity
  * @param E ezEntity object to check
  * @param TYPE ezEntityFlag to compare
  * @return boolean
  */
-#define ezEntityIsA(E, TYPE) ((E).parts.flag == ezEcs##TYPE##Type)
+#define EZ_ENTITY_IS_A(E, TYPE) ((E).parts.flag == ezEcs##TYPE##Type)
 
 /*!
- * @struct View
+ * @struct ezQuery
  * @abstract Structure to hold all components for an entity (used for queries)
  * @field componentData Array of component data
  * @field componentIndex Indexes for componentData
  * @field sizeOfComponentData Size of component data and index arrays
  * @field entityId Entity ID components belong to
  */
-typedef struct ezView {
+typedef struct ezQuery {
     void **componentData;
     ezEntity *componentIndex;
     size_t sizeOfComponentData;
     ezEntity entityId;
-} ezView;
+    void* userdata;
+} ezQuery;
 
 /*!
  * @typedef ezSystemCb
  * @abstract Typedef for System callbacks
- * @param view Struct containing component data
+ * @param query Struct containing component data
  */
-typedef void(*ezSystemCb)(ezView* view);
+typedef void(*ezSystemCb)(ezQuery* query);
 /*!
  * @struct Prefab
  * @abstract Prefab component type (Array of component IDs)
@@ -409,9 +410,10 @@ void ezEcsSet(ezWorld *world, ezEntity entity, ezEntity component, const void *d
  * @param world ezWorld instance
  * @param entity Parent entity
  * @param relation Type of relation (Must be a registered component/tag)
- * @param cb Query callback
+ * @param callback Query callback
+ * @param userdata Userdata to send to callback
  */
-void ezEcsRelations(ezWorld *world, ezEntity entity, ezEntity relation, ezSystemCb cb);
+void ezEcsRelations(ezWorld *world, ezEntity entity, ezEntity relation, ezSystemCb callback, void *userdata);
 
 /*!
  * @function ezEcsStep
@@ -423,19 +425,20 @@ void ezEcsStep(ezWorld *world);
  * @function ezEcsQuery
  * @abstract Query all entities with given components
  * @param world ezWorld instance
- * @param cb Query callback
+ * @param callback Query callback
+ * @param userdata Userdata to send to callback
  * @param components Array of component IDs
  * @param sizeOfComponents Length of component array
  */
-void ezEcsQuery(ezWorld *world, ezSystemCb cb, ezEntity *components, size_t sizeOfComponents);
+void ezEcsQuery(ezWorld *world, ezSystemCb callback, void *userdata, ezEntity *components, size_t sizeOfComponents);
 /*!
- * @function ezEcsViewField
- * @abstract Retrieve a component from View object at specified index (For use in ezEcsQuery callbacks)
- * @param view View object
+ * @function ezEcsQueryField
+ * @abstract Retrieve a component from ezQuery object at specified index (For use in ezEcsQuery callbacks)
+ * @param query Query object
  * @param index Component index
  * @return Pointer to component data
  */
-void* ezEcsViewField(ezView *view, size_t index);
+void* ezEcsQueryField(ezQuery *query, size_t index);
 
 #if defined(__cplusplus)
 }
@@ -446,11 +449,11 @@ void* ezEcsViewField(ezView *view, size_t index);
 #include <assert.h>
 #if defined(DEBUG)
 #include <stdio.h>
-#define ASSERT(X) \
+#define ASSERT(X)                                                                              \
     do {                                                                                       \
         if (!(X)) {                                                                            \
             fprintf(stderr, "ERROR! Assertion hit! %s:%s:%d\n", __FILE__, __func__, __LINE__); \
-            assert(0);                                                                     \
+            assert(0);                                                                         \
         }                                                                                      \
     } while(0)
 #define ECS_ASSERT(X, Y, V)                                                                    \
@@ -458,7 +461,7 @@ void* ezEcsViewField(ezView *view, size_t index);
         if (!(X)) {                                                                            \
             fprintf(stderr, "ERROR! Assertion hit! %s:%s:%d\n", __FILE__, __func__, __LINE__); \
             Dump##Y(V);                                                                        \
-            assert(0);                                                                     \
+            assert(0);                                                                         \
         }                                                                                      \
     } while(0)
 #else
@@ -496,9 +499,6 @@ void* ezEcsViewField(ezView *view, size_t index);
         SAFE_FREE(_p);          \
         *p = NULL;              \
     }
-
-const uint64_t ezEcsNil = 0xFFFFFFFFull;
-const ezEntity ezEcsNilEntity = { .id = ezEcsNil };
 
 typedef struct EcsSparse {
     ezEntity *sparse;
@@ -557,20 +557,20 @@ static void DestroyEcsSparse(EcsSparse **sparse) {
 
 static int SparseHas(EcsSparse *sparse, ezEntity e) {
     ASSERT(sparse);
-    uint32_t id = ezEntityID(e);
-    ASSERT(id != ezEcsNil);
-    return (id < sparse->sizeOfSparse) && (ezEntityID(sparse->sparse[id]) != ezEcsNil);
+    uint32_t id = EZ_ENTITY_ID(e);
+    ASSERT(id != EZ_ECS_NIL);
+    return (id < sparse->sizeOfSparse) && (EZ_ENTITY_ID(sparse->sparse[id]) != EZ_ECS_NIL);
 }
 
 static void SparseEmplace(EcsSparse *sparse, ezEntity e) {
     ASSERT(sparse);
-    uint32_t id = ezEntityID(e);
-    ASSERT(id != ezEcsNil);
+    uint32_t id = EZ_ENTITY_ID(e);
+    ASSERT(id != EZ_ECS_NIL);
     if (id >= sparse->sizeOfSparse) {
         const size_t newSize = id + 1;
         sparse->sparse = realloc(sparse->sparse, newSize * sizeof * sparse->sparse);
         for (size_t i = sparse->sizeOfSparse; i < newSize; i++)
-            sparse->sparse[i] = ezEcsNilEntity;
+            sparse->sparse[i] = EZ_NIL_ENTITY;
         sparse->sizeOfSparse = newSize;
     }
     sparse->sparse[id] = (ezEntity) { .parts = { .id = (uint32_t)sparse->sizeOfDense } };
@@ -582,13 +582,13 @@ static size_t SparseRemove(EcsSparse *sparse, ezEntity e) {
     ASSERT(sparse);
     ECS_ASSERT(SparseHas(sparse, e), Sparse, sparse);
     
-    const uint32_t id = ezEntityID(e);
-    uint32_t pos = ezEntityID(sparse->sparse[id]);
+    const uint32_t id = EZ_ENTITY_ID(e);
+    uint32_t pos = EZ_ENTITY_ID(sparse->sparse[id]);
     ezEntity other = sparse->dense[sparse->sizeOfDense-1];
     
-    sparse->sparse[ezEntityID(other)] = (ezEntity) { .parts = { .id = pos } };
+    sparse->sparse[EZ_ENTITY_ID(other)] = (ezEntity) { .parts = { .id = pos } };
     sparse->dense[pos] = other;
-    sparse->sparse[id] = ezEcsNilEntity;
+    sparse->sparse[id] = EZ_NIL_ENTITY;
     sparse->dense = realloc(sparse->dense, --sparse->sizeOfDense * sizeof * sparse->dense);
     
     return pos;
@@ -596,9 +596,9 @@ static size_t SparseRemove(EcsSparse *sparse, ezEntity e) {
 
 static size_t SparseAt(EcsSparse *sparse, ezEntity e) {
     ASSERT(sparse);
-    uint32_t id = ezEntityID(e);
-    ASSERT(id != ezEcsNil);
-    return ezEntityID(sparse->sparse[id]);
+    uint32_t id = EZ_ENTITY_ID(e);
+    ASSERT(id != EZ_ECS_NIL);
+    return EZ_ENTITY_ID(sparse->sparse[id]);
 }
 
 static EcsStorage* NewStorage(ezEntity id, size_t sz) {
@@ -622,7 +622,7 @@ static void DestroyEcsStorage(EcsStorage **storage) {
 
 static int StorageHas(EcsStorage *storage, ezEntity e) {
     ASSERT(storage);
-    ASSERT(!ezEntityIsNil(e));
+    ASSERT(!EZ_ENTITY_IS_NIL(e));
     return SparseHas(storage->sparse, e);
 }
 
@@ -652,7 +652,7 @@ static void* StorageAt(EcsStorage *storage, size_t pos) {
 
 static void* StorageGet(EcsStorage *storage, ezEntity e) {
     ASSERT(storage);
-    ASSERT(!ezEntityIsNil(e));
+    ASSERT(!EZ_ENTITY_IS_NIL(e));
     return StorageAt(storage, SparseAt(storage->sparse, e));
 }
 
@@ -673,7 +673,7 @@ ECS_BOOTSTRAP
 ezWorld* ezEcsNewWorld(void) {
     ezWorld *result = malloc(sizeof(ezWorld));
     *result = (ezWorld){0};
-    result->nextAvailableId = ezEcsNil;
+    result->nextAvailableId = EZ_ECS_NIL;
     
 #define X(NAME, SZ) ezEcs##NAME = ezEcsNewComponent(result, SZ);
     ECS_BOOTSTRAP
@@ -714,8 +714,8 @@ void ezEcsFreeWorld(ezWorld **world) {
 
 int ezEcsIsValid(ezWorld *world, ezEntity e) {
     ASSERT(world);
-    uint32_t id = ezEntityID(e);
-    return id < world->sizeOfEntities && ezEntityCompare(world->entities[id], e);
+    uint32_t id = EZ_ENTITY_ID(e);
+    return id < world->sizeOfEntities && EZ_ENTITY_CMP(world->entities[id], e);
 }
 
 static ezEntity EcsNewEntityType(ezWorld *world, uint8_t type) {
@@ -723,7 +723,7 @@ static ezEntity EcsNewEntityType(ezWorld *world, uint8_t type) {
     if (world->sizeOfRecyclable) {
         uint32_t idx = world->recyclable[world->sizeOfRecyclable-1];
         ezEntity e = world->entities[idx];
-        ezEntity new = ECS_COMPOSE_ENTITY(ezEntityID(e), ezEntityVersion(e), type);
+        ezEntity new = ECS_COMPOSE_ENTITY(EZ_ENTITY_ID(e), EZ_ENTITY_VERSION(e), type);
         world->entities[idx] = new;
         world->recyclable = realloc(world->recyclable, --world->sizeOfRecyclable * sizeof(uint32_t));
         return new;
@@ -741,7 +741,7 @@ ezEntity ezEcsNewEntity(ezWorld *world) {
 
 static EcsStorage* EcsFind(ezWorld *world, ezEntity e) {
     for (int i = 0; i < world->sizeOfStorages; i++)
-        if (ezEntityID(world->storages[i]->componentId) == ezEntityID(e))
+        if (EZ_ENTITY_ID(world->storages[i]->componentId) == EZ_ENTITY_ID(e))
             return world->storages[i];
     return NULL;
 }
@@ -765,7 +765,7 @@ int ezEcsHas(ezWorld *world, ezEntity entity, ezEntity component) {
 
 ezEntity ezEcsNewComponent(ezWorld *world, size_t sizeOfComponent) {
     ezEntity e = EcsNewEntityType(world, ezEcsComponentType);
-    return EcsAssure(world, e, sizeOfComponent) ? e : ezEcsNilEntity;
+    return EcsAssure(world, e, sizeOfComponent) ? e : EZ_NIL_ENTITY;
 }
 
 ezEntity ezEcsNewSystem(ezWorld *world, ezSystemCb fn, size_t sizeOfComponents, ...) {
@@ -816,8 +816,8 @@ void ezEcsDeleteEntity(ezWorld *world, ezEntity e) {
     for (size_t i = world->sizeOfStorages; i; --i)
         if (world->storages[i - 1] && SparseHas(world->storages[i - 1]->sparse, e))
             StorageRemove(world->storages[i - 1], e);
-    uint32_t id = ezEntityID(e);
-    world->entities[id] = ECS_COMPOSE_ENTITY(id, ezEntityVersion(e) + 1, 0);
+    uint32_t id = EZ_ENTITY_ID(e);
+    world->entities[id] = ECS_COMPOSE_ENTITY(id, EZ_ENTITY_VERSION(e) + 1, 0);
     world->recyclable = realloc(world->recyclable, ++world->sizeOfRecyclable * sizeof(uint32_t));
     world->recyclable[world->sizeOfRecyclable-1] = id;
 }
@@ -830,7 +830,7 @@ void ezEcsAttach(ezWorld *world, ezEntity entity, ezEntity component) {
         case ezEcsPrefabType: {
             ezPrefab *c = ezEcsGet(world, component, ezEcsPrefab);
             for (int i = 0; i < c->sizeOfComponents; i++) {
-                if (ezEntityIsNil(c->components[i]))
+                if (EZ_ENTITY_IS_NIL(c->components[i]))
                     break;
                 ezEcsAttach(world, entity, c->components[i]);
             }
@@ -852,9 +852,9 @@ void ezEcsAssociate(ezWorld *world, ezEntity entity, ezEntity object, ezEntity r
     ASSERT(world);
     ECS_ASSERT(ezEcsIsValid(world, entity), Entity, entity);
     ECS_ASSERT(ezEcsIsValid(world, object), Entity, object);
-    ECS_ASSERT(ezEntityIsA(object, Component), Entity, object);
+    ECS_ASSERT(EZ_ENTITY_IS_A(object, Component), Entity, object);
     ECS_ASSERT(ezEcsIsValid(world, relation), Entity, relation);
-    ECS_ASSERT(ezEntityIsA(relation, Normal), Entity, relation);
+    ECS_ASSERT(EZ_ENTITY_IS_A(relation, Normal), Entity, relation);
     ezEcsAttach(world, entity, ezEcsRelation);
     ezRelation *pair = ezEcsGet(world, entity, ezEcsRelation);
     pair->object = object;
@@ -886,7 +886,7 @@ int ezEcsHasRelation(ezWorld *world, ezEntity entity, ezEntity object) {
     ezRelation *relation = StorageGet(storage, entity);
     if (!relation)
         return 0;
-    return ezEntityCompare(relation->object, object);
+    return EZ_ENTITY_CMP(relation->object, object);
 }
 
 int ezEcsRelated(ezWorld *world, ezEntity entity, ezEntity relation) {
@@ -898,7 +898,7 @@ int ezEcsRelated(ezWorld *world, ezEntity entity, ezEntity relation) {
     ezRelation *_relation = StorageGet(storage, entity);
     if (!_relation)
         return 0;
-    return ezEntityCompare(_relation->relation, relation);
+    return EZ_ENTITY_CMP(_relation->relation, relation);
 }
 
 void* ezEcsGet(ezWorld *world, ezEntity entity, ezEntity component) {
@@ -924,43 +924,44 @@ void ezEcsSet(ezWorld *world, ezEntity entity, ezEntity component, const void *d
     memcpy(componentData, data, storage->sizeOfComponent);
 }
 
-static void DestroyView(ezView *view) {
-    SAFE_FREE(view->componentIndex);
-    SAFE_FREE(view->componentData);
+static void QueryFree(ezQuery *query) {
+    SAFE_FREE(query->componentIndex);
+    SAFE_FREE(query->componentData);
 }
 
-void ezEcsRelations(ezWorld *world, ezEntity entity, ezEntity relation, ezSystemCb cb) {
+void ezEcsRelations(ezWorld *world, ezEntity entity, ezEntity relation, ezSystemCb cb, void *userdata) {
     EcsStorage *pairs = EcsFind(world, ezEcsRelation);
     for (size_t i = 0; i < world->sizeOfEntities; i++) {
         ezEntity e = world->entities[i];
         if (StorageHas(pairs, e)) {
             ezRelation *pair = StorageGet(pairs, e);
-            if (ezEntityCompare(pair->object, relation) && ezEntityCompare(pair->relation, entity)) {
-                ezView view = { .entityId = e };
-                view.componentData = malloc(sizeof(void*));
-                view.componentIndex = malloc(sizeof(ezEntity));
-                view.sizeOfComponentData = 1;
-                view.componentIndex[0] = relation;
-                view.componentData[0] = (void*)pair;
-                cb(&view);
-                DestroyView(&view);
+            if (EZ_ENTITY_CMP(pair->object, relation) && EZ_ENTITY_CMP(pair->relation, entity)) {
+                ezQuery query = { .entityId = e };
+                query.componentData = malloc(sizeof(void*));
+                query.componentIndex = malloc(sizeof(ezEntity));
+                query.sizeOfComponentData = 1;
+                query.componentIndex[0] = relation;
+                query.componentData[0] = (void*)pair;
+                query.userdata = userdata;
+                cb(&query);
+                QueryFree(&query);
             }
         }
     }
 }
 
 void ezEcsStep(ezWorld *world) {
-    EcsStorage *storage = world->storages[ezEntityID(ezEcsSystem)];
+    EcsStorage *storage = world->storages[EZ_ENTITY_ID(ezEcsSystem)];
     for (int i = 0; i < storage->sparse->sizeOfDense; i++) {
         ezSystem *system = StorageGet(storage, storage->sparse->dense[i]);
-        ezEcsQuery(world, system->callback, system->components, system->sizeOfComponents);
+        ezEcsQuery(world, system->callback, NULL, system->components, system->sizeOfComponents);
     }
 }
 
-void ezEcsQuery(ezWorld *world, ezSystemCb cb, ezEntity *components, size_t sizeOfComponents) {
+void ezEcsQuery(ezWorld *world, ezSystemCb cb, void *userdata, ezEntity *components, size_t sizeOfComponents) {
     for (size_t e = 0; e < world->sizeOfEntities; e++) {
         int hasComponents = 1;
-        ezView view = {
+        ezQuery query = {
             .componentData = NULL,
             .componentIndex = NULL,
             .sizeOfComponentData = 0,
@@ -970,11 +971,12 @@ void ezEcsQuery(ezWorld *world, ezSystemCb cb, ezEntity *components, size_t size
             EcsStorage *storage = EcsFind(world, components[i]);
             
             if (StorageHas(storage, world->entities[e])) {
-                view.sizeOfComponentData++;
-                view.componentData = realloc(view.componentData, view.sizeOfComponentData * sizeof(void*));
-                view.componentIndex = realloc(view.componentIndex, view.sizeOfComponentData * sizeof(ezEntity));
-                view.componentIndex[view.sizeOfComponentData-1] = components[i];
-                view.componentData[view.sizeOfComponentData-1] = StorageGet(storage, world->entities[e]);
+                query.sizeOfComponentData++;
+                query.componentData = realloc(query.componentData, query.sizeOfComponentData * sizeof(void*));
+                query.componentIndex = realloc(query.componentIndex, query.sizeOfComponentData * sizeof(ezEntity));
+                query.componentIndex[query.sizeOfComponentData-1] = components[i];
+                query.componentData[query.sizeOfComponentData-1] = StorageGet(storage, world->entities[e]);
+                query.userdata = userdata;
             } else {
                 hasComponents = 0;
                 break;
@@ -982,12 +984,12 @@ void ezEcsQuery(ezWorld *world, ezSystemCb cb, ezEntity *components, size_t size
         }
         
         if (hasComponents)
-            cb(&view);
-        DestroyView(&view);
+            cb(&query);
+        QueryFree(&query);
     }
 }
 
-void* ezEcsViewField(ezView *view, size_t index) {
-    return index >= view->sizeOfComponentData || ezEntityIsNil(view->componentIndex[index]) ? NULL : view->componentData[index];
+void* ezEcsQueryField(ezQuery *query, size_t index) {
+    return index >= query->sizeOfComponentData || EZ_ENTITY_IS_NIL(query->componentIndex[index]) ? NULL : query->componentData[index];
 }
 #endif
