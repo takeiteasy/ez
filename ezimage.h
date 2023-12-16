@@ -225,8 +225,10 @@ static int Blend(int _a, int _b) {
 }
 
 void ezImagePSet(ezImage *img, int x, int y, int col) {
-    if (x >= 0 && y >= 0 && x < img->w && y < img->h)
-        img->buf[y * img->w + x] = rgbA(col) == 255 ? col : Blend(ezImagePGet(img, x, y), col);
+    if (x >= 0 && y >= 0 && x < img->w && y < img->h) {
+        int a = rgbA(col);
+        img->buf[y * img->w + x] = a == 255 ? col : a == 0 ? 0 : Blend(ezImagePGet(img, x, y), col);
+    }
 }
 
 int ezImagePGet(ezImage *img, int x, int y) {
