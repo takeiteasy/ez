@@ -46,7 +46,7 @@ typedef struct ezArena {
     ezArenaRegion *head, *tail;
 } ezArena;
 
-void ezArenaReset(ezArena *arena);
+void ezArenaReset(ezArena *arena, void(*callback)(void*));
 void* ezArenaAlloc(ezArena *arena, size_t sizeOfMemory);
 void ezArenaFree(ezArena *arena, void *memory);
 
@@ -79,13 +79,18 @@ static int MemFree(void *location, size_t sizeOfMemory) {
 #endif
 }
 
-void ezArenaReset(ezArena *arena) {
-    Region *cursor = arena->head;
-    while (cursor) {
-        Region *tmp = cursor->next;
-        assert(MemFree(cursor->memory, cursor->sizeOfMemory));
-        cursor = tmp;
+void ezArenaReset(ezArena *arena, void(*callback)(void*)) {
+    ezArenaRegion *current = arena->head;
+    while(current) {
+        ezArenaRegion *next = current->next;
+        if (callback)
+            callback(current->memory);
+        assert(MemFree(current->memory, current->sizeOfMemory));
+        assert(MemFree(current, sizeof(ezArenaRegion)));
+        current = next;
     }
+    arena->head = NULL;
+    arena->tail = NULL;
 }
 
 void* ezArenaAlloc(ezArena *arena, size_t sizeOfMemory) {
