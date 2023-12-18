@@ -14,6 +14,7 @@ Simple include the header and define ```EZ[NAME]_IMPLEMENTATION``` (or just ```E
 | **ezecs.h**§      | Simple entity component system                                | **EZECS_IMPLEMENTATION**       |
 | **ezfs.h**§       | Common cross-platform file system functions                   | **EZFS_IMPLEMENTATION**        |
 | **ezimage.h**     | Image manipulation, .png importing + exporting                | **EZIMAGE_IMPLEMENTATION**     |
+| **ezmap.h**	    | Simple key value map + dictionary                             | **EZMAP_IMPLEMENTATION**       |
 | **ezmath.h**\*    | Common math functions + types                                 | **EZMATH_IMPLEMENTATION**      |
 | **ezobjc.h**†     | Wrapper for ObjC runtime                                      | N/A                            |
 | **ezrng.h**       | Simple pseudo random number generation                        | **EZRNG_IMPLEMENTATION**       |
