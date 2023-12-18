@@ -1,15 +1,15 @@
 /* ezmath.h -- Common math functions + types
  https://github.com/takeiteasy/
- 
+
  Some functionality relies on Clang + GCC extensions.
  When building `-fenable-matrix` must be passed.
 
  Acknowledgements:
     - A lot of this was hand translated from raylib's raymath.h header
       https://github.com/raysan5/raylib/blob/master/src/raymath.h (Zlib)
- 
+
  --------------------------------------------------------------------
- 
+
  The MIT License (MIT)
 
  Copyright (c) 2022 George Watson
@@ -74,15 +74,50 @@ extern "C" {
 #define EPSILON 0.000001f
 #endif
 
-#define Bytes(n) (n)
-#define Kilobytes(n) (n << 10)
-#define Megabytes(n) (n << 20)
-#define Gigabytes(n) (((uint64_t)n) << 30)
-#define Terabytes(n) (((uint64_t)n) << 40)
+#if !defined(FLOAT_EQ)
+#define FLOAT_EQ(A, B) ((fabsf((A) - (B))) <= (EPSILON * fmaxf(1.f, fmaxf(fabsf((A)), fabsf((B))))))
+#endif
+#if !defined(MIN)
+#define MIN(A, B) ((A) < (B) ? (A) : (B))
+#endif
+#if !defined(MAX)
+#define MAX(A, B) ((A) > (B) ? (A) : (B))
+#endif
+#if !defined(CLAMP)
+#define CLAMP(N, A, B) (MIN(MAX((N), (A)), (B)))
+#endif
+#if !defined(TO_DEGREES)
+#define TO_DEGREES(RADIANS) ((RADIANS) * (180.f / PI))
+#endif
+#if !defined(TO_RADIANS)
+#define TO_RADIANS(DEGREES) ((DEGREES) * (PI / 180.f))
+#endif
 
+#if !defined(BYTES)
+#define BYTES(n) (n)
+#endif
+#if !defined(KILOBYTES)
+#define KILOBYTES(n) (n << 10)
+#endif
+#if !defined(MEGABYTES)
+#define MEGABYTES(n) (n << 20)
+#endif
+#if !defined(GIGABYTES)
+#define GIGABYTES(n) (((uint64_t)n) << 30)
+#endif
+#if !defined(TERABYTES)
+#define TERABYTES(n) (((uint64_t)n) << 40)
+#endif
+
+#if !defined(THOUSAND)
 #define Thousand(n) ((n)*1000)
-#define Million(n) ((n)*1000000)
-#define Billion(n) ((n)*1000000000LL)
+#endif
+#if !defined(MILLION)
+#define MILLION(n) ((n)*1000000)
+#endif
+#if !defined(BILLION)
+#define BILLION(n) ((n)*1000000000LL)
+#endif
 
 #define MATRIX_TYPES \
     X(2, 2)          \
@@ -183,13 +218,6 @@ Matrix MatrixScaling(Vec3f scale);
 Matrix MatrixFrustum(float left, float right, float bottom, float top, float near, float far);
 Matrix MatrixPerspective(float fovY, float aspect, float nearPlane, float farPlane);
 Matrix MatrixOrtho(float left, float right, float bottom, float top, float nearPlane, float farPlane);
-
-int FloatCmp(float a, float b);
-int Min(int a, int b);
-int Max(int a, int b);
-int Clamp(int n, int min, int max);
-float Degrees(float radians);
-float Radians(float degrees);
 
 // Taken from `raylib` -- https://github.com/raysan5/raylib/blob/master/examples/others/reasings.h
 // Linear Easing functions
@@ -577,16 +605,16 @@ Matrix QuaternionToMatrix(Quaternion q) {
     float ad = q.w*q.x;
     float bd = q.w*q.y;
     float cd = q.w*q.z;
-    
+
     Matrix result = Mat44Identity();
     result[0][0] = 1 - 2*(b2 + c2);
     result[1][0] = 2*(ab + cd);
     result[2][0] = 2*(ac - bd);
-    
+
     result[0][1] = 2*(ab - cd);
     result[1][1] = 1 - 2*(a2 + c2);
     result[2][1] = 2*(bc + ad);
-    
+
     result[0][2] = 2*(ac + bd);
     result[1][2] = 2*(bc - ad);
     result[2][2] = 1 - 2*(a2 + b2);
@@ -597,7 +625,7 @@ Quaternion QuaternionFromAxisAngle(Vec3f axis, float angle) {
     float axisLength = Vec3Length(axis);
     if (axisLength == 0.f)
         return QuaternionIdentity();
-    
+
     axis = Vec3Normalize(axis);
     angle *= .5f;
     float sinres = sinf(angle);
@@ -628,7 +656,7 @@ Quaternion QuaternionFromEuler(float pitch, float yaw, float roll) {
     float y1 = sinf(yaw*0.5f);
     float z0 = cosf(roll*0.5f);
     float z1 = sinf(roll*0.5f);
-    
+
     return (Quaternion) {
         x1*y0*z0 - x0*y1*z1,
         x0*y1*z0 + x1*y0*z1,
@@ -686,7 +714,7 @@ Matrix MatrixInvert(Matrix mat) {
     float b10 = mat[1][2]*mat[3][3] - mat[3][2]*mat[1][3];
     float b11 = mat[2][2]*mat[3][3] - mat[3][2]*mat[2][3];
     float invDet = 1.0f/(b00*b11 - b01*b10 + b02*b09 + b03*b08 - b04*b07 + b05*b06);
-    
+
     Matrix result = Mat44Zero();
     result[0][0] = (mat[1][1]*b11 - mat[2][1]*b10 + mat[3][1]*b09)*invDet;
     result[1][0] = (-mat[1][0]*b11 + mat[2][0]*b10 - mat[3][0]*b09)*invDet;
@@ -720,7 +748,7 @@ Matrix MatrixRotation(Vec3f axis, float angle) {
     float s = sinf(angle);
     float c = cosf(angle);
     float t = 1.f - c;
-    
+
     Matrix result = Mat44Identity();
     result[0][0] = a.x*a.x*t + c;
     result[1][0] = a.y*a.x*t + a.z*s;
@@ -747,7 +775,7 @@ Matrix MatrixFrustum(float left, float right, float bottom, float top, float nea
     float rl = right - left;
     float tb = top - bottom;
     float fn = far - near;
-    
+
     Matrix result = Mat44Zero();
     result[0][0] = (near*2.0f)/rl;
     result[1][1] = (near*2.0f)/tb;
@@ -767,7 +795,7 @@ Matrix MatrixPerspective(float fovY, float aspect, float nearPlane, float farPla
     float rl = right - left;
     float tb = top - bottom;
     float fn = farPlane - nearPlane;
-    
+
     Matrix result = Mat44Zero();
     result[0][0] = (nearPlane*2.0f)/rl;
     result[1][1] = (nearPlane*2.0f)/tb;
@@ -799,7 +827,7 @@ Matrix MatrixLookAt(Vec3f eye, Vec3f target, Vec3f up) {
     Vec3f vz = Vec3Normalize(eye - target);
     Vec3f vx = Vec3Normalize(Vec3Cross(up, vz));
     Vec3f vy = Vec3Cross(vz, vx);
-    
+
     Matrix result = Mat44Zero();
     result[0][0] = vx.x;
     result[1][0] = vy.x;
@@ -815,30 +843,6 @@ Matrix MatrixLookAt(Vec3f eye, Vec3f target, Vec3f up) {
     result[2][3] = -Vec3Dot(vz, eye);
     result[3][3] = 1.0f;
     return result;
-}
-
-int FloatCmp(float a, float b) {
-    return (fabsf(a - b)) <= (EPSILON * fmaxf(1.0f, fmaxf(fabsf(a), fabsf(b))));
-}
-
-int Min(int a, int b) {
-    return a < b ? a : b;
-}
-
-int Max(int a, int b) {
-    return a > b ? a : b;
-}
-
-int Clamp(int n, int min, int max) {
-    return Min(Max(n, min), max);
-}
-
-float Degrees(float radians) {
-    return radians * (180.0f / PI);
-}
-
-float Radians(float degrees) {
-    return degrees * (PI / 180.0f);
 }
 
 float EaseLinearNone(float t, float b, float c, float d) {
@@ -979,7 +983,7 @@ float EaseBounceOut(float t, float b, float c, float d) {
 
 float EaseBounceIn(float t, float b, float c, float d) {
     return (c - EaseBounceOut(d - t, 0.0f, c, d) + b);
-    
+
 }
 
 float EaseBounceInOut(float t, float b, float c, float d) {
