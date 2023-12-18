@@ -60,11 +60,12 @@ void ezKVMClear(ezKVM *kvm, int adjustCapacity);
 void ezKVMFree(ezKVM *kvm);
 
 typedef ezKVM ezDictionary;
+typedef ezKVM ezDict;
 
 #define ezDictNew(...) ezKVMNew(__VA_ARGS__)
-int ezDictSet(ezDictionary *dict, const char *key, void *value);
-void* ezDictGet(ezDictionary *dict, const char *key);
-void* ezDictDel(ezDictionary *dict, const char *key);
+int ezDictSet(ezDict *dict, const char *key, void *value);
+void* ezDictGet(ezDict *dict, const char *key);
+void* ezDictDel(ezDict *dict, const char *key);
 #define ezDictScan(...) ezKVMScan(__VA_ARGS__)
 #define ezDictIter(...) ezKVMIter(__VA_ARGS__)
 #define ezDictClear(...) ezKVMClear(__VA_ARGS__)
@@ -72,6 +73,7 @@ void* ezDictDel(ezDictionary *dict, const char *key);
 
 uint64_t MurmurHash(const void *data, size_t len, uint32_t seed);
 
+// NOTE: ezMap is optional. It uses _Generic (C11)
 #ifdef __has_extension
 #if !__has_extension(c_generic_selections)
 #define EZ_MAP_DISABLE
@@ -116,7 +118,7 @@ typedef struct Bucket {
 } Bucket;
 
 #define BUCKET_AT(M, I) ((Bucket*)(((char*)((M)->buckets))+((M)->sizeOfBuckets*(I))))
-#define BUCKET_ITEM(B) ((char*)(B) + sizeof(Bucket*))
+#define BUCKET_ITEM(B) ((char*)(B) + sizeof(Bucket))
 
 #define GROW_AT   0.60 /* 60% */
 #define SHRINK_AT 0.10 /* 10% */
