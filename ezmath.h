@@ -337,7 +337,7 @@ MATRIX_TYPES
     {                                                                          \
         int r = 1;                                                             \
         for (int i = 0; i < L; i++)                                            \
-            if (!FloatCmp(a[i], b[i]))                                         \
+            if (!FLOAT_EQ(a[i], b[i]))                                         \
                 return 0;                                                      \
         return r;                                                              \
     }                                                                          \
@@ -374,21 +374,21 @@ MATRIX_TYPES
     {                                                                          \
     __VEC_T(L) r = {0};                                                        \
         for (int i = 0; i < L; i++)                                            \
-            r[i] = Clamp(v[i], min[i], max[i]);                                \
+            r[i] = CLAMP(v[i], min[i], max[i]);                                \
         return r;                                                              \
     }                                                                          \
     __VEC_T(L) __VEC_D(L, Min)(__VEC_T(L) v, __VEC_T(L) min)                   \
     {                                                                          \
     __VEC_T(L) r = {0};                                                        \
         for (int i = 0; i < L; i++)                                            \
-            r[i] = Min(v[i], min[i]);                                          \
+            r[i] = MIN(v[i], min[i]);                                          \
         return r;                                                              \
     }                                                                          \
     __VEC_T(L) __VEC_D(L, Max)(__VEC_T(L) v, __VEC_T(L) max)                   \
     {                                                                          \
     __VEC_T(L) r = {0};                                                        \
         for (int i = 0; i < L; i++)                                            \
-            r[i] = Max(v[i], max[i]);                                          \
+            r[i] = MAX(v[i], max[i]);                                          \
         return r;                                                              \
     }                                                                          \
     __VEC_T(L) __VEC_D(L, Lerp)(__VEC_T(L) v1, __VEC_T(L) v2, float n)         \
@@ -460,7 +460,7 @@ Vec3f Vec3RotateByAxisAngle(Vec3f v, Vec3f axis, float angle) {
     // Using Euler-Rodrigues Formula
     // Ref.: https://en.wikipedia.org/w/index.php?title=Euler%E2%80%93Rodrigues_formula
 
-    axis *= (1.0f / (Clamp(Vec3Length(axis), 0.f, 1.f)));
+    axis *= (1.0f / (CLAMP(Vec3Length(axis), 0.f, 1.f)));
 
     angle /= 2.0f;
     Vec3f w = axis * sinf(angle);
