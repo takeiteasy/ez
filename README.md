@@ -9,22 +9,33 @@ Simple include the header and define ```EZ[NAME]_IMPLEMENTATION``` (or just ```E
 
 | File              | Description                                                   | Define                         |
 | ----------------- | ------------------------------------------------------------- | ------------------------------ |
-| **ezarena.h**     | Simple memory arena implementation using mmap+VirtualAlloc    | **EZARENA_IMPLEMENTATION**     |
+| **ezarena.h**§    | Simple memory arena implementation using mmap+VirtualAlloc    | **EZARENA_IMPLEMENTATION**     |
 | **ezcontainer.h** | Simple immutable container format to save/load data from disk | **EZCONTAINER_IMPLEMENTATION** |
 | **ezecs.h**§      | Simple entity component system                                | **EZECS_IMPLEMENTATION**       |
 | **ezfs.h**§       | Common cross-platform file system functions                   | **EZFS_IMPLEMENTATION**        |
 | **ezimage.h**     | Image manipulation, .png importing + exporting                | **EZIMAGE_IMPLEMENTATION**     |
-| **ezmap.h**	    | Simple key value map + dictionary                             | **EZMAP_IMPLEMENTATION**       |
+| **ezmap.h**§      | Simple key value map + dictionary                             | **EZMAP_IMPLEMENTATION**       |
 | **ezmath.h**\*    | Common math functions + types                                 | **EZMATH_IMPLEMENTATION**      |
-| **ezobjc.h**†     | Wrapper for ObjC runtime                                      | N/A                            |
 | **ezrng.h**       | Simple pseudo random number generation                        | **EZRNG_IMPLEMENTATION**       |
 | **ezstack.h**§    | Simple double linked-list implementation                      | **EZSTACK_IMPLEMENTATION**     |
+| **eztimer.h**‡    | Cross-platform high resolution timer                          | **EZTIMER_IMPLEMENTATION**     |
 | **ezvector.h**‡   | Stretchy buffer implementation                                | **EZVECTOR_IMPLEMENTATION**    |
 
 * **\*** Relies on clang+gcc extensions, define -fenable-matrix when building
 * **†** Requires linking to external dependencies
 * **‡** Some functionality relies on clang+gcc
 * **§** Work in progress, expect massive changes
+
+## Auxiliary
+
+These files live in ```extra/```. They exist to be copied and pasted into other things.
+
+| File              | Description                                                   |
+| ----------------- | ------------------------------------------------------------- |
+| **ez128.h**       | Polyfill for uint128_t/int128_t                               |
+| **ezmemory.h**    | Just malloc/free defines                                      |
+| **ezobjc.h**      | Wrapper over Objective-C message system                       |
+| **ezplatform.h**  | Defines to check if system is one of the big three            |
 
 ## LICENSE
 ```

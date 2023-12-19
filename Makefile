@@ -5,7 +5,7 @@ PRG_SUFFIX_FLAG := 0
 endif
 
 LDFLAGS :=
-CFLAGS := -I. -Ideps -g -Wall
+CFLAGS := -I. -Itests/deps -g -Wall
 
 TOOLS := $(wildcard tests/*.c)
 PRGS := $(patsubst %.c,%,$(TOOLS))
