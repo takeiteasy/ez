@@ -4,6 +4,7 @@ Single header libraries mostly aimed towards game development. Recently I found 
 
 Simple include the header and define ```EZ[NAME]_IMPLEMENTATION``` (or just ```EZ_IMPLEMENTATION```) in one of your source files. There are no dependencies outside of the standard library unless otherwise stated.
 
+If you want to use custom malloc/free calls, define ```EZ_MALLOC``` or ```EZ_FREE``` before including. Realloc + calloc are also defined the same way.
 
 ## Libraries
 
@@ -28,7 +29,7 @@ Simple include the header and define ```EZ[NAME]_IMPLEMENTATION``` (or just ```E
 
 ## Auxiliary
 
-These files live in ```extra/```. They exist to be copied and pasted into other things.
+These files live in ```aux/```. They exist to be copied and pasted into other things. The ```aux``` folder also contains various test files.
 
 | File              | Description                                                   |
 | ----------------- | ------------------------------------------------------------- |
