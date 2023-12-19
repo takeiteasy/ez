@@ -268,9 +268,8 @@ void* ezKVMDel(ezKVM *kvm, uint64_t key) {
     size_t i = hash & kvm->mask;
     while(1) {
         Bucket *bucket = BUCKET_AT(kvm, i);
-        if (!bucket->dib) {
+        if (!bucket->dib)
             return NULL;
-        }
         void *bitem = BUCKET_ITEM(bucket);
         if (bucket->hash == hash) {
             memcpy(kvm->spare, bitem, kvm->sizeOfElements);
