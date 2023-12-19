@@ -59,10 +59,10 @@
 #define EZ_COMPILER clang
 #elif defined(__GNUC__) || defined(__GNUG__)
 #define EZ_COMPILER GCC
-#else
-#error "Unknown compiler"
 #endif
 
+#if defined(EZ_COMPILER) && defined(__SIZEOF__INT128__)
+#define EZ_128_AVAILABLE 1
 #pragma EZ_COMPILER diagnostic push
 #pragma EZ_COMPILER diagnostic ignored "-Wpragmas"
 #pragma EZ_COMPILER diagnostic ignored "-Wpedantic"
@@ -87,8 +87,18 @@ typedef __int128 int128_t;
 #ifndef INT128_MIN
 #define INT128_MIN (-INT128_MAX - 1)
 #endif
+#else
+#define EZ_128_AVAILABLE 0
+#endif
 
+#if EZ_128_AVAILABLE
 typedef uint128_t ezTimer;
+#else
+typedef struct ezTimer {
+    uint64_t hi;
+    uint64_t lo;
+} ezTimer;
+#endif
 
 ezTimer ezTimerNow(void);
 uint64_t ezTimerElapsed(ezTimer timer);
@@ -115,10 +125,19 @@ ezTimer ezTimerNow(void) {
     uint64_t lo = 1000000L;
     uint64_t hi = ticks;
 #endif
+#if EZ_128_AVAILABLE
     return ((uint128_t)hi << 64) | lo;
+#else
+    return (ezTimer){.hi = hi, .lo = lo};
+#endif
 }
 
 uint64_t ezTimerElapsed(ezTimer timer) {
-    return timer >> 64;
+    ezTimer now = ezTimer();
+#if EZ_128_AVAILABLE
+    return (now >> 64) - (timer >> 64);
+#else
+    return now.hi - timer.hi;
+#endif
 }
 #endif
