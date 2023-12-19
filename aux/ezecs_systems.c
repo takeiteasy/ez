@@ -21,15 +21,15 @@ typedef struct {
 } Velocity;
 
 static int posCbCounter = 0;
-static void posCb(ezView *view) {
-    TEST(!!EZ_FIELD(view, Position, 0), 1);
+static void posCb(ezQuery *query) {
+    TEST(!!EZ_FIELD(query, Position, 0), 1);
     posCbCounter++;
 }
 
 static int moveCbCounter = 0;
-static void moveCb(ezView *view) {
-    TEST(!!EZ_FIELD(view, Position, 0), 1);
-    TEST(!!EZ_FIELD(view, Velocity, 1), 1);
+static void moveCb(ezQuery *query) {
+    TEST(!!EZ_FIELD(query, Position, 0), 1);
+    TEST(!!EZ_FIELD(query, Velocity, 1), 1);
     moveCbCounter++;
 }
 
@@ -44,9 +44,9 @@ int main(int argc, const char *argv[]) {
     
     ezEntity velocity = EZ_COMPONENT(world, Velocity);
     ezEcsAttach(world, e2, position);
-    EZ_QUERY(world, posCb, position);
+    EZ_QUERY(world, posCb, NULL, position);
     ezEcsAttach(world, e1, velocity);
-    EZ_QUERY(world, moveCb, position, velocity);
+    EZ_QUERY(world, moveCb, NULL, position, velocity);
     TEST(posCbCounter, 2);
     TEST(moveCbCounter, 1);
     

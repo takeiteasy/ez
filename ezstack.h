@@ -32,6 +32,10 @@ extern "C" {
 #include <stdlib.h>
 #include <assert.h>
 
+#if !defined(EZ_MALLOC)
+#define EZ_MALLOC malloc
+#endif
+
 typedef struct ezStackEntry {
     int id;
     void *data;
@@ -55,7 +59,7 @@ ezStackEntry* ezStackDrop(ezStack *stack);
 #if defined(EZSTACK_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
 static ezStackEntry* NewStackEntry(int id, void *data, ezStackEntry *next, ezStackEntry *prev) {
     assert(data);
-    ezStackEntry *entry = malloc(sizeof(ezStackEntry));
+    ezStackEntry *entry = EZ_MALLOC(sizeof(ezStackEntry));
     entry->id   = id;
     entry->data = data;
     entry->next = next;

@@ -5,12 +5,12 @@ PRG_SUFFIX_FLAG := 0
 endif
 
 LDFLAGS :=
-CFLAGS := -I. -Itests/deps -g -Wall
+CFLAGS := -I. -Iaux/deps -g -Wall
 
-TOOLS := $(wildcard tests/*.c)
+TOOLS := $(wildcard aux/*.c)
 PRGS := $(patsubst %.c,%,$(TOOLS))
 PRG_SUFFIX=.exe
-BINS := $(patsubst tests/%,build/%$(PRG_SUFFIX),$(PRGS))
+BINS := $(patsubst aux/%,build/%$(PRG_SUFFIX),$(PRGS))
 OBJS := $(patsubst %,%.o,$(PRGS))
 ifeq ($(PRG_SUFFIX_FLAG),0)
 	OUTS = $(PRGS)
@@ -19,7 +19,7 @@ else
 endif
 
 .SECONDEXPANSION:
-OBJ = $(patsubst build/%$(PRG_SUFFIX),tests/%.o,$@)
+OBJ = $(patsubst build/%$(PRG_SUFFIX),aux/%.o,$@)
 ifeq ($(PRG_SUFFIX_FLAG),0)
 	BIN = $(patsubst %$(PRG_SUFFIX),%,$@)
 else

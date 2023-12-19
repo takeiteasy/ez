@@ -41,6 +41,16 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
+#if !defined(EZ_MALLOC)
+#define EZ_MALLOC malloc
+#endif
+#if !defined(EZ_REALLOC)
+#define EZ_REALLOC realloc
+#endif
+#if !defined(EZ_FREE)
+#define EZ_FREE free
+#endif
+
 // Taken from: https://gist.github.com/61131/7a22ac46062ee292c2c8bd6d883d28de
 #define N_ARGS(...) _NARG_(__VA_ARGS__, _RSEQ())
 #define _NARG_(...) _SEQ(__VA_ARGS__)
@@ -171,8 +181,9 @@ typedef struct ezWorld ezWorld;
  * @param WORLD ezWorld instance
  * @param PARENT Parent entity
  * @param CB Query callback
+ * @param UD Callback userdata
  */
-#define EZ_ENTITY_IS_CHILD_OF(WORLD, PARENT, CB) (ezEcsRelations((WORLD), (PARENT), ezEcsChildof, (CB)))
+#define EZ_ENTITY_IS_CHILD_OF(WORLD, PARENT, CB, UD) (ezEcsRelations((WORLD), (PARENT), ezEcsChildOf, (CB), (UD)))
 /*!
  * @defined EZ_ENTITY_IS_A
  * @abstract Check the type of an entity
@@ -484,7 +495,7 @@ void* ezEcsQueryField(ezQuery *query, size_t index);
     {                   \
         if ((X))        \
         {               \
-            free((X));  \
+            EZ_FREE((X));  \
             (X) = NULL; \
         }               \
     } while (0)
@@ -542,7 +553,7 @@ static void DumpStorage(EcsStorage *storage) {
 #endif
 
 static EcsSparse* NewSparse(void) {
-    EcsSparse *result = malloc(sizeof(EcsSparse));
+    EcsSparse *result = EZ_MALLOC(sizeof(EcsSparse));
     *result = (EcsSparse){0};
     return result;
 }
@@ -568,13 +579,13 @@ static void SparseEmplace(EcsSparse *sparse, ezEntity e) {
     ASSERT(id != EZ_ECS_NIL);
     if (id >= sparse->sizeOfSparse) {
         const size_t newSize = id + 1;
-        sparse->sparse = realloc(sparse->sparse, newSize * sizeof * sparse->sparse);
+        sparse->sparse = EZ_REALLOC(sparse->sparse, newSize * sizeof * sparse->sparse);
         for (size_t i = sparse->sizeOfSparse; i < newSize; i++)
             sparse->sparse[i] = EZ_NIL_ENTITY;
         sparse->sizeOfSparse = newSize;
     }
     sparse->sparse[id] = (ezEntity) { .parts = { .id = (uint32_t)sparse->sizeOfDense } };
-    sparse->dense = realloc(sparse->dense, (sparse->sizeOfDense + 1) * sizeof * sparse->dense);
+    sparse->dense = EZ_REALLOC(sparse->dense, (sparse->sizeOfDense + 1) * sizeof * sparse->dense);
     sparse->dense[sparse->sizeOfDense++] = e;
 }
 
@@ -589,7 +600,7 @@ static size_t SparseRemove(EcsSparse *sparse, ezEntity e) {
     sparse->sparse[EZ_ENTITY_ID(other)] = (ezEntity) { .parts = { .id = pos } };
     sparse->dense[pos] = other;
     sparse->sparse[id] = EZ_NIL_ENTITY;
-    sparse->dense = realloc(sparse->dense, --sparse->sizeOfDense * sizeof * sparse->dense);
+    sparse->dense = EZ_REALLOC(sparse->dense, --sparse->sizeOfDense * sizeof * sparse->dense);
 
     return pos;
 }
@@ -602,7 +613,7 @@ static size_t SparseAt(EcsSparse *sparse, ezEntity e) {
 }
 
 static EcsStorage* NewStorage(ezEntity id, size_t sz) {
-    EcsStorage *result = malloc(sizeof(EcsStorage));
+    EcsStorage *result = EZ_MALLOC(sizeof(EcsStorage));
     *result = (EcsStorage) {
         .componentId = id,
         .sizeOfComponent = sz,
@@ -628,7 +639,7 @@ static int StorageHas(EcsStorage *storage, ezEntity e) {
 
 static void* StorageEmplace(EcsStorage *storage, ezEntity e) {
     ASSERT(storage);
-    storage->data = realloc(storage->data, (storage->sizeOfData + 1) * sizeof(char) * storage->sizeOfComponent);
+    storage->data = EZ_REALLOC(storage->data, (storage->sizeOfData + 1) * sizeof(char) * storage->sizeOfComponent);
     storage->sizeOfData++;
     void *result = &((char*)storage->data)[(storage->sizeOfData - 1) * sizeof(char) * storage->sizeOfComponent];
     SparseEmplace(storage->sparse, e);
@@ -641,7 +652,7 @@ static void StorageRemove(EcsStorage *storage, ezEntity e) {
     memmove(&((char*)storage->data)[pos * sizeof(char) * storage->sizeOfComponent],
             &((char*)storage->data)[(storage->sizeOfData - 1) * sizeof(char) * storage->sizeOfComponent],
             storage->sizeOfComponent);
-    storage->data = realloc(storage->data, --storage->sizeOfData * sizeof(char) * storage->sizeOfComponent);
+    storage->data = EZ_REALLOC(storage->data, --storage->sizeOfData * sizeof(char) * storage->sizeOfComponent);
 }
 
 static void* StorageAt(EcsStorage *storage, size_t pos) {
@@ -671,7 +682,7 @@ ECS_BOOTSTRAP
 #undef X
 
 ezWorld* ezEcsNewWorld(void) {
-    ezWorld *result = malloc(sizeof(ezWorld));
+    ezWorld *result = EZ_MALLOC(sizeof(ezWorld));
     *result = (ezWorld){0};
     result->nextAvailableId = EZ_ECS_NIL;
 
@@ -690,7 +701,7 @@ ezWorld* ezEcsNewWorld(void) {
     case N: {                                                                \
         for (int j = 0; j < storage->sparse->sizeOfDense; j++) {             \
             ez##TYPE *type = StorageGet(storage, storage->sparse->dense[j]); \
-            free(type->components);                                          \
+            EZ_FREE(type->components);                                       \
         }                                                                    \
         break;                                                               \
     }
@@ -725,10 +736,10 @@ static ezEntity EcsNewEntityType(ezWorld *world, uint8_t type) {
         ezEntity e = world->entities[idx];
         ezEntity new = ECS_COMPOSE_ENTITY(EZ_ENTITY_ID(e), EZ_ENTITY_VERSION(e), type);
         world->entities[idx] = new;
-        world->recyclable = realloc(world->recyclable, --world->sizeOfRecyclable * sizeof(uint32_t));
+        world->recyclable = EZ_REALLOC(world->recyclable, --world->sizeOfRecyclable * sizeof(uint32_t));
         return new;
     } else {
-        world->entities = realloc(world->entities, ++world->sizeOfEntities * sizeof(ezEntity));
+        world->entities = EZ_REALLOC(world->entities, ++world->sizeOfEntities * sizeof(ezEntity));
         ezEntity e = ECS_COMPOSE_ENTITY((uint32_t)world->sizeOfEntities-1, 0, type);
         world->entities[world->sizeOfEntities-1] = e;
         return e;
@@ -751,7 +762,7 @@ static EcsStorage* EcsAssure(ezWorld *world, ezEntity componentId, size_t sizeOf
     if (found)
         return found;
     EcsStorage *new = NewStorage(componentId, sizeOfComponent);
-    world->storages = realloc(world->storages, (world->sizeOfStorages + 1) * sizeof * world->storages);
+    world->storages = EZ_REALLOC(world->storages, (world->sizeOfStorages + 1) * sizeof * world->storages);
     world->storages[world->sizeOfStorages++] = new;
     return new;
 }
@@ -774,7 +785,7 @@ ezEntity ezEcsNewSystem(ezWorld *world, ezSystemCb fn, size_t sizeOfComponents, 
     ezSystem *c = ezEcsGet(world, e, ezEcsSystem);
     c->callback = fn;
     c->sizeOfComponents = sizeOfComponents;
-    c->components = malloc(sizeof(ezEntity) * sizeOfComponents);
+    c->components = EZ_MALLOC(sizeof(ezEntity) * sizeOfComponents);
 
     va_list args;
     va_start(args, sizeOfComponents);
@@ -789,7 +800,7 @@ ezEntity ezEcsNewPrefab(ezWorld *world, size_t sizeOfComponents, ...) {
     ezEcsAttach(world, e, ezEcsPrefab);
     ezPrefab *c = ezEcsGet(world, e, ezEcsPrefab);
     c->sizeOfComponents = sizeOfComponents;
-    c->components = malloc(sizeof(ezEntity) * sizeOfComponents);
+    c->components = EZ_MALLOC(sizeof(ezEntity) * sizeOfComponents);
 
     va_list args;
     va_start(args, sizeOfComponents);
@@ -807,7 +818,7 @@ void ezEcsDeleteEntity(ezWorld *world, ezEntity e) {
         case ezEcs##TYPE##Type: {                          \
             ez##TYPE *s = ezEcsGet(world, e, ezEcs##TYPE); \
             if (s && s->components)                        \
-                free(s->components);                       \
+                EZ_FREE(s->components);                    \
             break;                                         \
         }
         DEL_TYPES
@@ -818,7 +829,7 @@ void ezEcsDeleteEntity(ezWorld *world, ezEntity e) {
             StorageRemove(world->storages[i - 1], e);
     uint32_t id = EZ_ENTITY_ID(e);
     world->entities[id] = ECS_COMPOSE_ENTITY(id, EZ_ENTITY_VERSION(e) + 1, 0);
-    world->recyclable = realloc(world->recyclable, ++world->sizeOfRecyclable * sizeof(uint32_t));
+    world->recyclable = EZ_REALLOC(world->recyclable, ++world->sizeOfRecyclable * sizeof(uint32_t));
     world->recyclable[world->sizeOfRecyclable-1] = id;
 }
 
@@ -937,8 +948,8 @@ void ezEcsRelations(ezWorld *world, ezEntity entity, ezEntity relation, ezSystem
             ezRelation *pair = StorageGet(pairs, e);
             if (EZ_ENTITY_CMP(pair->object, relation) && EZ_ENTITY_CMP(pair->relation, entity)) {
                 ezQuery query = { .entityId = e };
-                query.componentData = malloc(sizeof(void*));
-                query.componentIndex = malloc(sizeof(ezEntity));
+                query.componentData = EZ_MALLOC(sizeof(void*));
+                query.componentIndex = EZ_MALLOC(sizeof(ezEntity));
                 query.sizeOfComponentData = 1;
                 query.componentIndex[0] = relation;
                 query.componentData[0] = (void*)pair;
@@ -972,8 +983,8 @@ void ezEcsQuery(ezWorld *world, ezSystemCb cb, void *userdata, ezEntity *compone
 
             if (StorageHas(storage, world->entities[e])) {
                 query.sizeOfComponentData++;
-                query.componentData = realloc(query.componentData, query.sizeOfComponentData * sizeof(void*));
-                query.componentIndex = realloc(query.componentIndex, query.sizeOfComponentData * sizeof(ezEntity));
+                query.componentData = EZ_REALLOC(query.componentData, query.sizeOfComponentData * sizeof(void*));
+                query.componentIndex = EZ_REALLOC(query.componentIndex, query.sizeOfComponentData * sizeof(ezEntity));
                 query.componentIndex[query.sizeOfComponentData-1] = components[i];
                 query.componentData[query.sizeOfComponentData-1] = StorageGet(storage, world->entities[e]);
                 query.userdata = userdata;

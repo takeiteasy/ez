@@ -37,6 +37,13 @@ extern "C" {
 #include <string.h>
 #include <stddef.h>
 
+#if !defined(EZ_MALLOC)
+#define EZ_MALLOC malloc
+#endif
+#if !defined(EZ_FREE)
+#define EZ_FREE free
+#endif
+
 typedef struct ezKVM {
     size_t sizeOfElements;
     size_t capacity;
@@ -91,15 +98,21 @@ typedef ezKVM ezMap;
 
 #define ezMapNew(...) ezKVMNew(__VA_ARGS__)
 #define ezMapSet(KVM, KEY, VAL) _Generic((KEY),                 \
+                                         int: ezKVMSet,         \
                                          uint64_t: ezKVMSet,    \
+                                         char*: ezDictSet,      \
                                          const char*: ezDictSet \
                                         )(KVM, KEY, VAL)
 #define ezMapGet(KVM, KEY) _Generic((KEY),                 \
+                                    int: ezKVMGet,         \
                                     uint64_t: ezKVMGet,    \
+                                    char*: ezDictGet,      \
                                     const char*: ezDictGet \
                                    )(KVM, KEY)
 #define ezMapDel(KVM, KEY) _Generic((KEY),                 \
+                                    int: ezKVMDel,         \
                                     uint64_t: ezKVMDel,    \
+                                    char*: ezDictDel,      \
                                     const char*: ezDictDel \
                                    )(KVM, KEY)
 #define ezMapScan(...) ezKVMScan(__VA_ARGS__)
@@ -145,7 +158,7 @@ ezKVM* ezKVMNew(size_t capacity, size_t sizeOfElements) {
         sizeOfBuckets++;
     
     size_t size = sizeof(ezKVM) + sizeOfBuckets * 2;
-    ezKVM *result = malloc(size);
+    ezKVM *result = EZ_MALLOC(size);
     memset(result, 0, size);
     result->sizeOfElements = sizeOfElements;
     result->sizeOfBuckets = sizeOfBuckets;
@@ -154,7 +167,7 @@ ezKVM* ezKVMNew(size_t capacity, size_t sizeOfElements) {
     result->capacity = capacity;
     result->bucketsCount = capacity;
     result->mask = capacity - 1;
-    result->buckets = malloc(result->sizeOfBuckets * result->bucketsCount);
+    result->buckets = EZ_MALLOC(result->sizeOfBuckets * result->bucketsCount);
     memset(result->buckets, 0, result->sizeOfBuckets * result->bucketsCount);
     result->growPower = 1;
     result->loadFactor = GROW_AT * 100;
@@ -188,13 +201,13 @@ static void ResizeKVM(ezKVM *kvm, size_t newCapacity) {
         }
     }
     
-    free(kvm->buckets);
+    EZ_FREE(kvm->buckets);
     kvm->buckets = tmp->buckets;
     kvm->bucketsCount = tmp->bucketsCount;
     kvm->mask = tmp->mask;
     kvm->growAt = tmp->growAt;
     kvm->shrinkAt = tmp->shrinkAt;
-    free(tmp);
+    EZ_FREE(tmp);
 }
 
 int ezKVMSet(ezKVM *kvm, uint64_t key, void *value) {
@@ -320,9 +333,9 @@ void ezKVMClear(ezKVM *kvm, int adjustCapacity) {
     if (adjustCapacity)
         kvm->capacity = kvm->bucketsCount;
     else if (kvm->bucketsCount != kvm->capacity) {
-        void *new_buckets = malloc(kvm->sizeOfBuckets*kvm->capacity);
+        void *new_buckets = EZ_MALLOC(kvm->sizeOfBuckets*kvm->capacity);
         if (new_buckets) {
-            free(kvm->buckets);
+            EZ_FREE(kvm->buckets);
             kvm->buckets = new_buckets;
         }
         kvm->bucketsCount = kvm->capacity;
@@ -334,8 +347,8 @@ void ezKVMClear(ezKVM *kvm, int adjustCapacity) {
 }
 
 void ezKVMFree(ezKVM *kvm) {
-    free(kvm->buckets);
-    free(kvm);
+    EZ_FREE(kvm->buckets);
+    EZ_FREE(kvm);
 }
 
 //-----------------------------------------------------------------------------

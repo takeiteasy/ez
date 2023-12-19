@@ -38,6 +38,13 @@ extern "C" {
 
 #include <stdlib.h>
 
+#if !defined(EZ_REALLOC)
+#define EZ_MALLOC realloc
+#endif
+#if !defined(EZ_FREE)
+#define EZ_MALLOC free
+#endif
+
 #define __vector_raw(a)         ((int *) (void *) (a) - 2)
 #define __vector_m(a)           __vector_raw(a)[0]
 #define __vector_n(a)           __vector_raw(a)[1]
@@ -70,7 +77,7 @@ extern "C" {
 #define MAP_LIST_UD(f, userdata, ...) EVAL(MAP_LIST1_UD(f, userdata, __VA_ARGS__, ()()(), ()()(), ()()(), 0))
 
 // Free vector and assign to NULL
-#define ezVectorFree(a)        ((a) ? free(__vector_raw(a)),((a)=NULL) : 0)
+#define ezVectorFree(a)        ((a) ? EZ_FREE(__vector_raw(a)),((a)=NULL) : 0)
 // Append an element to the end of a vector
 #define ezVectorPush(a,v)      (__vector_maybegrow(a,1), (a)[__vector_n(a)++] = (v))
 #define MAP_VECTOR_PUSH(v, a)  (ezVectorPush(a, v))
@@ -395,7 +402,7 @@ static void *__vector_growf(void *arr, int increment, int itemsize) {
     int dbl_cur = arr ? 2 * __vector_m(arr) : 0;
     int min_needed = ezVectorCount(arr) + increment;
     int m = dbl_cur > min_needed ? dbl_cur : min_needed;
-    int *p = realloc(arr ? __vector_raw(arr) : 0, itemsize * m + sizeof(int) * 2);
+    int *p = EZ_REALLOC(arr ? __vector_raw(arr) : 0, itemsize * m + sizeof(int) * 2);
     if (p) {
         if (!arr)
             p[1] = 0;

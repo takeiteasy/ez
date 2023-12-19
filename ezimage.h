@@ -47,6 +47,19 @@ extern "C" {
 #include <setjmp.h>
 #include <errno.h>
 
+#if !defined(EZ_MALLOC)
+#define EZ_MALLOC malloc
+#endif
+#if !defined(EZ_CALLOC)
+#define EZ_CALLOC calloc
+#endif
+#if !defined(EZ_REALLOC)
+#define EZ_REALLOC realloc
+#endif
+#if !defined(EZ_FREE)
+#define EZ_FREE free
+#endif
+
 int RGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 int RGB(unsigned char r, unsigned char g, unsigned char b);
 int RGBA1(unsigned char c, unsigned char a);
@@ -145,18 +158,18 @@ int RGBa(int c, unsigned char a) {
 }
 
 ezImage* ezImageNew(unsigned int w, unsigned int h) {
-    ezImage *result = malloc(sizeof(ezImage));
+    ezImage *result = EZ_MALLOC(sizeof(ezImage));
     result->w = w;
     result->h = h;
-    result->buf = malloc(w * h * sizeof(int));
+    result->buf = EZ_MALLOC(w * h * sizeof(int));
     return result;
 }
 
 void ezImageFree(ezImage *img) {
     if (img) {
         if (img->buf)
-            free(img->buf);
-        free(img);
+            EZ_FREE(img->buf);
+        EZ_FREE(img);
     }
 }
 
@@ -650,11 +663,11 @@ void ezImageDrawStringFormat(ezImage *img, int x, int y, int col, const char *fm
     va_list args;
     va_start(args, fmt);
     size_t size = _vscprintf(fmt, args) + 1;
-    char *str = malloc(sizeof(char) * size);
+    char *str = EZ_MALLOC(sizeof(char) * size);
     vsnprintf(str, size, fmt, args);
     va_end(args);
     ezImageDrawString(img, str, x, y, col);
-    free(str);
+    EZ_FREE(str);
 }
 
 typedef struct {
@@ -692,7 +705,7 @@ static int unfilter(int w, int h, int bipp, unsigned char *raw) {
     int len = rowBytes(w, bipp);
     int bpp = rowBytes(1, bipp);
     int x, y;
-    unsigned char *first = (unsigned char*)malloc(len + 1);
+    unsigned char *first = (unsigned char*)EZ_MALLOC(len + 1);
     memset(first, 0, len + 1);
     unsigned char *prev = first;
     for (y = 0; y < h; y++, prev = raw, raw += len) {
@@ -718,7 +731,7 @@ static int unfilter(int w, int h, int bipp, unsigned char *raw) {
         }
 #undef LOOP
     }
-    free(first);
+    EZ_FREE(first);
     return 1;
 }
 
@@ -1016,7 +1029,7 @@ static void dynamic(State *s) {
 
 static int inflate(void *out, unsigned outlen, const void *in, unsigned inlen) {
     int last;
-    State *s = calloc(1, sizeof(State));
+    State *s = EZ_CALLOC(1, sizeof(State));
 
     // We assume we can buffer 2 extra bytes from off the end of 'in'.
     s->in = (unsigned char*)in;
@@ -1028,7 +1041,7 @@ static int inflate(void *out, unsigned outlen, const void *in, unsigned inlen) {
     bits(s, 0);
 
     if (setjmp(s->jmp) == 1) {
-        free(s);
+        EZ_FREE(s);
         return 0;
     }
 
@@ -1051,7 +1064,7 @@ static int inflate(void *out, unsigned outlen, const void *in, unsigned inlen) {
         }
     } while (!last);
 
-    free(s);
+    EZ_FREE(s);
     return 1;
 }
 
@@ -1104,7 +1117,7 @@ static ezImage* load_png(PNG *png) {
     // Join IDAT chunks.
     for (idat = find(png, "IDAT", 0); idat; idat = find(png, "IDAT", 0)) {
         unsigned len = get32(idat - 8);
-        data = realloc(data, datalen + len);
+        data = EZ_REALLOC(data, datalen + len);
         if (!data)
             break;
         
@@ -1140,12 +1153,12 @@ static ezImage* load_png(PNG *png) {
         convert(bipp / 8, img->w, img->h, out, img->buf, trns);
     }
     
-    free(data);
+    EZ_FREE(data);
     return img;
     
 err:
     if (data)
-        free(data);
+        EZ_FREE(data);
     ezImageFree(img);
     return NULL;
 }
@@ -1156,7 +1169,7 @@ static unsigned char* read_file(const char *path, size_t *sizeOfFile) {
     size_t size = ftell(fp);
     rewind(fp);
 
-    unsigned char *data = malloc(size + 1);
+    unsigned char *data = EZ_MALLOC(size + 1);
     fread(data, size, 1, fp);
     fclose(fp);
     
@@ -1171,7 +1184,7 @@ ezImage* ezImageLoadFromPath(const char *path) {
     if (!(data = read_file(path, &sizeOfData)) && sizeOfData > 0)
         return 0;
     ezImage *result = ezImageLoadFromMemory((void*)data, sizeOfData);
-    free(data);
+    EZ_FREE(data);
     return result;
 }
 

@@ -60,6 +60,10 @@ extern "C" {
 #define chdir _chdir
 #endif
 
+#if !defined(EZ_MALLOC)
+#define EZ_MALLOC malloc
+#endif
+
 #if !defined(MAX_PATH)
 #if defined(FS_PLATFORM_MAC)
 #define MAX_PATH 255
@@ -108,7 +112,7 @@ char* FormatString(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
     int size = vsnprintf(NULL, 0, fmt, args) + 1;
-    char *buf = malloc(size);
+    char *buf = EZ_MALLOC(size);
     vsnprintf(buf, size, fmt, args);
     va_end(args);
     return buf;
@@ -124,7 +128,7 @@ char* LoadFile(const char *path, size_t *length) {
     sz = ftell(fh);
     fseek(fh, 0, SEEK_SET);
 
-    result = malloc(sz * sizeof(char));
+    result = EZ_MALLOC(sz * sizeof(char));
     fread(result, sz, 1, fh);
     fclose(fh);
     

@@ -27,8 +27,12 @@
 typedef unsigned __int128 uint128_t;
 #pragma EZ_COMPILER diagnostic pop
 
-#define UINT128_(n) ((uint128_t)n)
-#define UINT128_MAX (~UINT128_C(0))
+#if !defined(UINT128)
+#define UINT128(n) ((uint128_t)n)
+#endif
+#if !defined(UINT128_MAX)
+#define UINT128_MAX (~UINT128(0))
+#endif
 
 #pragma EZ_COMPILER diagnostic push
 #pragma EZ_COMPILER diagnostic ignored "-Wpragmas"
@@ -37,7 +41,9 @@ typedef unsigned __int128 uint128_t;
 typedef __int128 int128_t;
 #pragma EZ_COMPILER diagnostic pop
 
+#if !defined(INT128)
 #define INT128(n) ((int128_t)n)
+#endif
 #ifndef UINT128_MAX
 #define INT128_MAX ((int128_t)(UINT128_MAX >> 1))
 #endif

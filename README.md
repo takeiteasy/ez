@@ -33,7 +33,6 @@ These files live in ```extra/```. They exist to be copied and pasted into other 
 | File              | Description                                                   |
 | ----------------- | ------------------------------------------------------------- |
 | **ez128.h**       | Polyfill for uint128_t/int128_t                               |
-| **ezmemory.h**    | Just malloc/free defines                                      |
 | **ezobjc.h**      | Wrapper over Objective-C message system                       |
 | **ezplatform.h**  | Defines to check if system is one of the big three            |
 

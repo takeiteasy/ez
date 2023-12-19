@@ -13,8 +13,8 @@ static int TEST_COUNTER = 0;
     } while (0)
 
 static int childCbCounter = 0;
-static void childCb(ezView *view) {
-    TEST(!!EZ_FIELD(view, ezRelation, 0), 1);
+static void childCb(ezQuery *query) {
+    TEST(!!EZ_FIELD(query, ezRelation, 0), 1);
     childCbCounter++;
 }
 
@@ -24,14 +24,14 @@ int main(int argc, char *argv[]) {
     ezEntity e1 = ezEcsNewEntity(world);
     ezEntity parent = ezEcsNewEntity(world);
     ezEntity child = ezEcsNewEntity(world);
-    ezEcsAssociate(world, child, ezEcsChildof, parent);
-    ezEcsAssociate(world, e1, ezEcsChildof, parent);
-    EZ_ENTITY_IS_CHILD_OF(world, parent, childCb);
+    ezEcsAssociate(world, child, ezEcsChildOf, parent);
+    ezEcsAssociate(world, e1, ezEcsChildOf, parent);
+    EZ_ENTITY_IS_CHILD_OF(world, parent, childCb, NULL);
     TEST(childCbCounter, 2);
-    TEST(ezEcsHasRelation(world, child, ezEcsChildof), 1);
+    TEST(ezEcsHasRelation(world, child, ezEcsChildOf), 1);
     TEST(ezEcsRelated(world, child, parent), 1);
     ezEcsDisassociate(world, e1);
-    EZ_ENTITY_IS_CHILD_OF(world, parent, childCb);
+    EZ_ENTITY_IS_CHILD_OF(world, parent, childCb, NULL);
     TEST(childCbCounter, 3);
     
     ezEcsFreeWorld(&world);

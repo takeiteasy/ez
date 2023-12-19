@@ -43,13 +43,13 @@ int main(int argc, const char * argv[]) {
     parentC->child = childC;
     
     ezMap *map = ezMapNew(0, sizeof(ParentStruct));
-    ezMapSet(map, (uint64_t)1, parentA);
-    ezMapSet(map, (uint64_t)2, parentB);
-    ezMapSet(map, (uint64_t)3, parentC);
+    ezMapSet(map, 1, parentA);
+    ezMapSet(map, 2, parentB);
+    ezMapSet(map, 3, parentC);
     
-    ParentStruct *parentA2 = ezMapGet(map, (uint64_t)1);
-    ParentStruct *parentB2 = ezMapGet(map, (uint64_t)2);
-    ParentStruct *parentC2 = ezMapGet(map, (uint64_t)3);
+    ParentStruct *parentA2 = ezMapGet(map, 1);
+    ParentStruct *parentB2 = ezMapGet(map, 2);
+    ParentStruct *parentC2 = ezMapGet(map, 3);
     
     assert(parentA->id == parentA2->id);
     assert(!strcmp(parentA->name, parentA->name));
@@ -64,13 +64,13 @@ int main(int argc, const char * argv[]) {
     assert(parentC2->child->id = childC->id);
     assert(!strcmp(parentC2->child->name, childC->name));
     
-    ezMapDel(map, (uint64_t)3);
-    ParentStruct *parentC3 = ezMapGet(map, (uint64_t)3);
+    ezMapDel(map, 3);
+    ParentStruct *parentC3 = ezMapGet(map, 3);
     assert(!parentC3);
     
     ezMapClear(map, 1);
-    ParentStruct *parentA3 = ezMapGet(map, (uint64_t)1);
-    ParentStruct *parentB3 = ezMapGet(map, (uint64_t)2);
+    ParentStruct *parentA3 = ezMapGet(map, 1);
+    ParentStruct *parentB3 = ezMapGet(map, 2);
     assert(!parentA3);
     assert(!parentB3);
     

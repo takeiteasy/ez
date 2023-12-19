@@ -32,6 +32,13 @@ extern "C" {
 #include <stdlib.h>
 #include <time.h>
 
+#if !defined(EZ_MALLOC)
+#define EZ_MALLOC malloc
+#endif
+#if !defined(EZ_FREE)
+#define EZ_FREE free
+#endif
+
 typedef struct ezRandom {
     unsigned int seed;
     int p1, p2;
@@ -39,7 +46,7 @@ typedef struct ezRandom {
 } ezRandom;
 
 ezRandom* ezRandomNew(unsigned int s);
-#define ezRandomFree(R) free((R))
+#define ezRandomFree(R) EZ_FREE((R))
 
 unsigned int ezRandomBits(ezRandom *r);
 float ezRandomFloat(ezRandom *r);
@@ -57,7 +64,7 @@ double ezRandomDouble(ezRandom *r);
 
 #if defined(EZRNG_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
 ezRandom* ezRandomNew(unsigned int s) {
-    ezRandom *r = malloc(sizeof(ezRandom));
+    ezRandom *r = EZ_MALLOC(sizeof(ezRandom));
     if (!s)
         s = (unsigned int)time(NULL);
     r->seed = s;

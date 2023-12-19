@@ -35,6 +35,13 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
+#if !defined(EZ_MALLOC)
+#define EZ_MALLOC malloc
+#endif
+#if !defined(EZ_FREE)
+#define EZ_FREE free
+#endif
+
 typedef struct ezContainerHeader {
     int magic, numberOfFiles;
 } ezContainerHeader;
@@ -144,7 +151,7 @@ void ezContainerWrite(const char* path, int n, const char** files) {
     fwrite(&header, sizeof(ezContainerHeader), 1, fh);
     long long offset = ftell(fh);
     
-    ezContainerEntry* header_map = malloc(n * sizeof(ezContainerEntry));
+    ezContainerEntry* header_map = EZ_MALLOC(n * sizeof(ezContainerEntry));
     for (int i = 0; i < n; ++i) {
         long long fn_len = strlen(files[i]);
         header_map[i].nameLength = fn_len;
@@ -167,18 +174,18 @@ void ezContainerWrite(const char* path, int n, const char** files) {
     for (int i = 0; i < n; ++i) {
         FILE* in = fopen(files[i], "r");
         long long fileSize = header_map[i].fileSize;
-        unsigned char* data = malloc(fileSize * sizeof(unsigned char));
+        unsigned char* data = EZ_MALLOC(fileSize * sizeof(unsigned char));
         fread(data, fileSize * sizeof(unsigned char), 1, in);
         fwrite(data, fileSize * sizeof(unsigned char), 1, fh);
-        free(data);
+        EZ_FREE(data);
     }
     
-    free(header_map);
+    EZ_FREE(header_map);
     fclose(fh);
 }
 
 ezContainer* ezContainerRead(const char* path) {
-    ezContainer* tree = malloc(sizeof(ezContainer));
+    ezContainer* tree = EZ_MALLOC(sizeof(ezContainer));
     tree->fh = fopen(path, "r");
     assert(tree->fh);
     
@@ -187,10 +194,10 @@ ezContainer* ezContainerRead(const char* path) {
     assert(header.magic == EZCONTAINER_MAGIC && header.numberOfFiles);
     
     tree->sizeOfEntries = header.numberOfFiles;
-    tree->entries = malloc(header.numberOfFiles * sizeof(ezContainerTreeEntry));
+    tree->entries = EZ_MALLOC(header.numberOfFiles * sizeof(ezContainerTreeEntry));
     for (int i = 0; i < header.numberOfFiles; ++i) {
         fread(&tree->entries[i].entry, sizeof(ezContainerEntry), 1, tree->fh);
-        tree->entries[i].filePath = malloc(tree->entries[i].entry.nameLength * sizeof(char));
+        tree->entries[i].filePath = EZ_MALLOC(tree->entries[i].entry.nameLength * sizeof(char));
         fread(tree->entries[i].filePath, tree->entries[i].entry.nameLength * sizeof(char), 1, tree->fh);
         tree->entries[i].filePath[tree->entries[i].entry.nameLength] = '\0';
     }
@@ -211,7 +218,7 @@ ezContainerEntry* ezContainerFind(ezContainer* tree, const char* path) {
 
 unsigned char* ezContainerEntryRaw(ezContainer* tree, ezContainerEntry* entry) {
     assert(tree && entry && entry->fileOffset < tree->fileSize);
-    unsigned char* data = malloc(entry->fileSize * sizeof(unsigned char));
+    unsigned char* data = EZ_MALLOC(entry->fileSize * sizeof(unsigned char));
     fsetpos(tree->fh, &entry->fileOffset);
     fread(data, entry->fileSize * sizeof(unsigned char), 1, tree->fh);
     return data;
@@ -221,9 +228,9 @@ void ezContainerFree(ezContainer* tree) {
     assert(tree);
     fclose(tree->fh);
     for (int i = 0; i < tree->sizeOfEntries; ++i)
-        free(tree->entries[i].filePath);
-    free(tree->entries);
+        EZ_FREE(tree->entries[i].filePath);
+    EZ_FREE(tree->entries);
     memset(tree, 0, sizeof(ezContainer));
-    free(tree);
+    EZ_FREE(tree);
 }
 #endif
