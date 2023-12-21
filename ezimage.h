@@ -85,7 +85,7 @@ void ezImageFlood(ezImage *img, int x, int y, int col);
 void ezImagePSet(ezImage *img, int x, int y, int col);
 int ezImagePGet(ezImage *img, int x, int y);
 int ezImagePaste(ezImage *dst, ezImage *src, int x, int y);
-int ezImagePasteClipped(ezImage *dst, ezImage *src, int x, int y, int rx, int ry, int rw, int rh);
+int ezImagePartialPaste(ezImage *dst, ezImage *src, int x, int y, int rx, int ry, int rw, int rh);
 ezImage*  ezImageDupe(ezImage *src);
 void ezImagePassThru(ezImage *img, int(*fn)(int x, int y, int col));
 ezImage*  ezImageResize(ezImage *src, int nw, int nh);
@@ -266,7 +266,7 @@ int ezImagePaste(ezImage *dst, ezImage *src, int x, int y) {
     return 1;
 }
 
-int ezImagePasteClipped(ezImage *dst, ezImage *src, int x, int y, int rx, int ry, int rw, int rh) {
+int ezImagePartialPaste(ezImage *dst, ezImage *src, int x, int y, int rx, int ry, int rw, int rh) {
     for (int ox = 0; ox < rw; ++ox)
         for (int oy = 0; oy < rh; ++oy)
             ezImagePSet(dst, ox + x, oy + y, ezImagePGet(src, ox + rx, oy + ry));

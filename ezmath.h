@@ -170,6 +170,7 @@ float Vec2Angle(Vec2f v1, Vec2f v2);
 Vec2f Vec2Rotate(Vec2f v, float angle);
 Vec2f Vec2MoveTowards(Vec2f v, Vec2f target, float maxDistance);
 Vec2f Vec2Reflect(Vec2f v, Vec2f normal);
+float Vec2Cross(Vec2f a, Vec2f b);
 
 Vec3f Vec3Reflect(Vec3f v, Vec3f normal);
 Vec3f Vec3Cross(Vec3f v1, Vec3f v2);
@@ -420,6 +421,10 @@ Vec2f Vec2MoveTowards(Vec2f v, Vec2f target, float maxDistance) {
 
 Vec2f Vec2Reflect(Vec2f v, Vec2f normal) {
     return v - (2.f * normal) * Vec2Dot(v, normal);
+}
+
+float Vec2Cross(Vec2f a, Vec2f b) {
+    return a.x * b.y - a.y * b.x;
 }
 
 Vec3f Vec3Reflect(Vec3f v, Vec3f normal) {
