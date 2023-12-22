@@ -145,7 +145,6 @@ MATRIX_TYPES
     typedef float __VEC_T(L) __attribute__((ext_vector_type(L)));               \
     typedef int Vec##L##i __attribute__((ext_vector_type(L)));                  \
     __VEC_T(L) __VEC_D(L, Zero)(void);                                          \
-    __VEC_T(L) __VEC_D(L, New)(float x, ...);                                   \
     void __VEC_D(L, Print)(__VEC_T(L) v);                                       \
     float __VEC_D(L, Sum)(__VEC_T(L) v);                                        \
     int __VEC_D(L, Equals)(__VEC_T(L) a, __VEC_T(L) b);                         \
@@ -161,6 +160,11 @@ MATRIX_TYPES
     __VEC_T(L) __VEC_D(L, Lerp)(__VEC_T(L) v1, __VEC_T(L) v2, float n);
 VECTOR_TYPES
 #undef X
+
+#define Vec2New(X, Y) (Vec2f){(X), (Y)}
+#define Vec3New(X, Y, Z) (Vec3f){(X), (Y), (Z)}
+#define Vec4New(X, Y, Z, W) (Vec4f){(X), (Y), (Z), (W)}
+#define QuaternionNew Vec4New
 
 typedef Vec4f Quaternion;
 typedef Vec2i Position;
@@ -307,17 +311,6 @@ MATRIX_TYPES
     {                                                                          \
         __VEC_T(L) v;                                                          \
         memset(&v, 0, sizeof(float) * L);                                      \
-        return v;                                                              \
-    }                                                                          \
-    __VEC_T(L) __VEC_D(L, New)(float x, ...)                                   \
-    {                                                                          \
-        va_list args;                                                          \
-        va_start(args, L - 1);                                                 \
-        __VEC_T(L) v;                                                          \
-        v[0] = x;                                                              \
-        for (int i = 0; i < L - 1; i++)                                        \
-            v[i + 1] = (float)va_arg(args, double);                            \
-        va_end(args);                                                          \
         return v;                                                              \
     }                                                                          \
     void __VEC_D(L, Print)(__VEC_T(L) v)                                       \
