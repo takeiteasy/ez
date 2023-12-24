@@ -188,7 +188,6 @@ Vec3f Vec3Barycentre(Vec3f p, Vec3f a, Vec3f b, Vec3f c);
 Vec3f Vec3Unproject(Vec3f source, Matrix projection, Matrix view);
 
 #define QuaternionZero(...) Vec4Zero(__VA_ARGS__)
-#define QuaternionNew(...) Vec4New(__VA_ARGS__)
 #define QuaternionPrint(...) Vec4Print(__VA_ARGS__)
 #define QuaternionSum(...) Vec4Sum(__VA_ARGS__)
 #define QuaternionLengthSqr(...) Vec4LengthSqr(__VA_ARGS__)
