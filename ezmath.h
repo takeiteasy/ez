@@ -119,6 +119,7 @@ extern "C" {
 #define BILLION(n) ((n)*1000000000LL)
 #endif
 
+#if !defined(EZ_MATH_DISABLE_MATRIX)
 #define MATRIX_TYPES \
     X(2, 2)          \
     X(3, 3)          \
@@ -133,6 +134,7 @@ extern "C" {
     __MATRIX_T(W, H) __MATRIX_D(W, H, Zero)(void);
 MATRIX_TYPES
 #undef X
+#endif
 
 #define VECTOR_TYPES \
     X(2)             \
@@ -214,6 +216,7 @@ Vec3f QuaternionToEuler(Quaternion q);
 Quaternion QuaternionTransform(Quaternion q, Matrix mat);
 int QuaternionEquals(Quaternion p, Quaternion q);
 
+#if !defined(EZ_MATH_DISABLE_MATRIX)
 float MatrixDetermint(Matrix mat);
 Matrix MatrixInvert(Matrix mat);
 Matrix MatrixTranslation(Vec3f v);
@@ -222,6 +225,7 @@ Matrix MatrixScaling(Vec3f scale);
 Matrix MatrixFrustum(float left, float right, float bottom, float top, float near, float far);
 Matrix MatrixPerspective(float fovY, float aspect, float nearPlane, float farPlane);
 Matrix MatrixOrtho(float left, float right, float bottom, float top, float nearPlane, float farPlane);
+#endif
 
 // Taken from `raylib` -- https://github.com/raysan5/raylib/blob/master/examples/others/reasings.h
 // Linear Easing functions
@@ -268,6 +272,7 @@ float EaseElasticInOut(float t, float b, float c, float d);
 #endif // EZMATH_HEADER
 
 #if defined(EZMATH_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
+#if !defined(EZ_MATH_DISABLE_MATRIX)
 #define X(W, H)                                                      \
     __MATRIX_T(W, H) __MATRIX_D(W, H, Identity)(void)                \
     {                                                                \
@@ -302,9 +307,8 @@ float EaseElasticInOut(float t, float b, float c, float d);
     }
 MATRIX_TYPES
 #undef X
+#endif
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wvarargs"
 #define X(L)                                                                   \
     __VEC_T(L) __VEC_D(L, Zero)(void)                                          \
     {                                                                          \
@@ -390,7 +394,6 @@ MATRIX_TYPES
     }
 VECTOR_TYPES
 #undef X
-#pragma clang diagnostic pop
 
 float Vec2Angle(Vec2f v1, Vec2f v2) {
     return atan2f(v2.y, v2.x) - atan2f(v1.y, v1.x);
@@ -592,6 +595,7 @@ Quaternion QuaternionFromMatrix(Matrix mat) {
     }
 }
 
+#if !defined(EZ_MATH_DISABLE_MATRIX)
 Matrix QuaternionToMatrix(Quaternion q) {
     float a2 = q.x*q.x;
     float b2 = q.y*q.y;
@@ -841,6 +845,7 @@ Matrix MatrixLookAt(Vec3f eye, Vec3f target, Vec3f up) {
     result[3][3] = 1.0f;
     return result;
 }
+#endif
 
 float EaseLinearNone(float t, float b, float c, float d) {
     return (c * t / d + b);

@@ -99,9 +99,11 @@ void ezImageDrawCharacter(ezImage *img, char c, int x, int y, int col);
 void ezImageDrawString(ezImage *img, const char *str, int x, int y, int col);
 void ezImageDrawStringFormat(ezImage *img, int x, int y, int col, const char *fmt, ...);
 
+#if !defined(EZ_IMAGE_DISABLE_INOUT)
 ezImage*  ezImageLoadFromPath(const char *path);
 ezImage*  ezImageLoadFromMemory(const void *data, size_t length);
 int ezImageSave(ezImage *img, const char *path);
+#endif
 
 #if defined(__cplusplus)
 }
@@ -670,6 +672,7 @@ void ezImageDrawStringFormat(ezImage *img, int x, int y, int col, const char *fm
     EZ_FREE(str);
 }
 
+#if !defined(EZ_IMAGE_DISABLE_INOUT)
 typedef struct {
     const unsigned char *p, *end;
 } PNG;
@@ -1377,4 +1380,5 @@ int ezImageSave(ezImage *img, const char *path) {
     fclose(out);
     return !err;
 }
+#endif // EZ_IMAGE_DISABLE_INOUT
 #endif // EZIMAGE_IMPLEMENTATION
