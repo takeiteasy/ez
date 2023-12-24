@@ -27,16 +27,6 @@ If you want to use custom malloc/free calls, define ```EZ_MALLOC``` or ```EZ_FRE
 * **‡** Some functionality relies on clang+gcc
 * **§** Work in progress, expect massive changes
 
-## Auxiliary
-
-These files live in ```aux/```. They exist to be copied and pasted into other things. The ```aux``` folder also contains various test files.
-
-| File              | Description                                                   |
-| ----------------- | ------------------------------------------------------------- |
-| **ez128.h**       | Polyfill for uint128_t/int128_t                               |
-| **ezobjc.h**      | Wrapper over Objective-C message system                       |
-| **ezplatform.h**  | Defines to check if system is one of the big three            |
-
 ## LICENSE
 ```
 The MIT License (MIT)
