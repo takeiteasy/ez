@@ -170,7 +170,6 @@ VECTOR_TYPES
 
 typedef Vec4f Quaternion;
 typedef Vec2i Position;
-typedef Mat44 Matrix;
 
 float Vec2Angle(Vec2f v1, Vec2f v2);
 Vec2f Vec2Rotate(Vec2f v, float angle);
@@ -185,9 +184,7 @@ float Vec3Angle(Vec3f v1, Vec3f v2);
 Vec3f Vec3RotateByQuaternion(Vec3f v, Quaternion q);
 Vec3f Vec3RotateByAxisAngle(Vec3f v, Vec3f axis, float angle);
 Vec3f Vec3Refract(Vec3f v, Vec3f n, float r);
-Vec3f Vec3Transform(Vec3f v, Matrix mat);
 Vec3f Vec3Barycentre(Vec3f p, Vec3f a, Vec3f b, Vec3f c);
-Vec3f Vec3Unproject(Vec3f source, Matrix projection, Matrix view);
 
 #define QuaternionZero(...) Vec4Zero(__VA_ARGS__)
 #define QuaternionPrint(...) Vec4Print(__VA_ARGS__)
@@ -207,17 +204,23 @@ Quaternion QuaternionIdentity(void);
 Quaternion QuaternionMultiply(Quaternion q1, Quaternion q2);
 Quaternion QuaternionInvert(Quaternion q);
 Quaternion QuaternionFromVec3ToVec3(Vec3f from, Vec3f to);
-Quaternion QuaternionFromMatrix(Matrix mat);
-Matrix QuaternionToMatrix(Quaternion q);
 Quaternion QuaternionFromAxisAngle(Vec3f axis, float angle);
 void QuaternionToAxisAngle(Quaternion q, Vec3f *outAxis, float *outAngle);
 Quaternion QuaternionFromEuler(float pitch, float yaw, float roll);
 Vec3f QuaternionToEuler(Quaternion q);
-Quaternion QuaternionTransform(Quaternion q, Matrix mat);
 int QuaternionEquals(Quaternion p, Quaternion q);
 
 #if !defined(EZ_MATH_DISABLE_MATRIX)
+typedef Mat44 Matrix;
+
+Vec3f Vec3Transform(Vec3f v, Matrix mat);
+Vec3f Vec3Unproject(Vec3f source, Matrix projection, Matrix view);
 float MatrixDetermint(Matrix mat);
+
+Quaternion QuaternionFromMatrix(Matrix mat);
+Matrix QuaternionToMatrix(Quaternion q);
+Quaternion QuaternionTransform(Quaternion q, Matrix mat);
+
 Matrix MatrixInvert(Matrix mat);
 Matrix MatrixTranslation(Vec3f v);
 Matrix MatrixRotation(Vec3f axis, float angle);
@@ -474,14 +477,6 @@ Vec3f Vec3Refract(Vec3f v, Vec3f n, float r) {
     return d < 0 ? Vec3Zero() : r * v - (r * dot + sqrtf(d)) * n;
 }
 
-Vec3f Vec3Transform(Vec3f v, Matrix mat) {
-    return (Vec3f) {
-        mat[0][0]*v.x + mat[0][1]*v.y + mat[0][2]*v.z + mat[0][3],
-        mat[1][0]*v.x + mat[1][1]*v.y + mat[1][2]*v.z + mat[1][3],
-        mat[2][0]*v.x + mat[2][1]*v.y + mat[2][2]*v.z + mat[2][3]
-    };
-}
-
 Vec3f Vec3Barycentre(Vec3f p, Vec3f a, Vec3f b, Vec3f c) {
     Vec3f v0 = b - a;
     Vec3f v1 = c - a;
@@ -495,15 +490,6 @@ Vec3f Vec3Barycentre(Vec3f p, Vec3f a, Vec3f b, Vec3f c) {
     float y = (d11*d20 - d01*d21)/denom;
     float z = (d00*d21 - d01*d20)/denom;
     return (Vec3f) {1.0f - (z + y), y, z};
-}
-
-Vec3f Vec3Unproject(Vec3f source, Matrix projection, Matrix view) {
-    Quaternion p = QuaternionTransform((Quaternion){source.x, source.y, source.z, 1.f }, MatrixInvert(view * projection));
-    return (Vec3f) {
-        p.x / p.w,
-        p.y / p.w,
-        p.z / p.w
-    };
 }
 
 Quaternion QuaternionIdentity(void) {
@@ -536,6 +522,7 @@ Quaternion QuaternionFromVec3ToVec3(Vec3f from, Vec3f to) {
     return QuaternionNormalize(QuaternionNew(cross.x, cross.y, cross.z, 1.f + Vec3Dot(from, to)));
 }
 
+#if !defined(EZ_MATH_DISABLE_MATRIX)
 Quaternion QuaternionFromMatrix(Matrix mat) {
     float fourWSquaredMinus1 = mat[0][0] + mat[1][1] + mat[2][2];
     float fourXSquaredMinus1 = mat[0][0] - mat[1][1] - mat[2][2];
@@ -595,7 +582,23 @@ Quaternion QuaternionFromMatrix(Matrix mat) {
     }
 }
 
-#if !defined(EZ_MATH_DISABLE_MATRIX)
+Vec3f Vec3Unproject(Vec3f source, Matrix projection, Matrix view) {
+    Quaternion p = QuaternionTransform((Quaternion){source.x, source.y, source.z, 1.f }, MatrixInvert(view * projection));
+    return (Vec3f) {
+        p.x / p.w,
+        p.y / p.w,
+        p.z / p.w
+    };
+}
+
+Vec3f Vec3Transform(Vec3f v, Matrix mat) {
+    return (Vec3f) {
+        mat[0][0]*v.x + mat[0][1]*v.y + mat[0][2]*v.z + mat[0][3],
+        mat[1][0]*v.x + mat[1][1]*v.y + mat[1][2]*v.z + mat[1][3],
+        mat[2][0]*v.x + mat[2][1]*v.y + mat[2][2]*v.z + mat[2][3]
+    };
+}
+
 Matrix QuaternionToMatrix(Quaternion q) {
     float a2 = q.x*q.x;
     float b2 = q.y*q.y;
