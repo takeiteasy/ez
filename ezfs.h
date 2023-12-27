@@ -59,6 +59,7 @@ extern "C" {
 #define getcwd _getcwd
 #define chdir _chdir
 #endif
+#include <assert.h>
 
 #if !defined(EZ_MALLOC)
 #define EZ_MALLOC malloc
@@ -83,7 +84,7 @@ extern "C" {
 int DoesFileExist(const char *path);
 int DoesDirExist(const char *path);
 char *FormatString(const char *fmt, ...);
-char *LoadFile(const char *path, size_t *length);
+unsigned char *LoadFile(const char *path, size_t *length);
 const char *JoinPath(const char *a, const char *b);
 const char *UserPath(void);
 const char *CurrentDirectory(void);
@@ -118,8 +119,8 @@ char* FormatString(const char *fmt, ...) {
     return buf;
 }
 
-char* LoadFile(const char *path, size_t *length) {
-    char *result = NULL;
+unsigned char* LoadFile(const char *path, size_t *length) {
+    unsigned char *result = NULL;
     size_t sz = -1;
     FILE *fh = fopen(path, "rb");
     if (!fh)
@@ -128,7 +129,7 @@ char* LoadFile(const char *path, size_t *length) {
     sz = ftell(fh);
     fseek(fh, 0, SEEK_SET);
 
-    result = EZ_MALLOC(sz * sizeof(char));
+    result = EZ_MALLOC(sz * sizeof(unsigned char));
     fread(result, sz, 1, fh);
     fclose(fh);
     
