@@ -50,28 +50,34 @@ extern "C" {
 #include <math.h>
 
 #ifndef PI
-#define PI 3.14159265358979323846f
+#define PI 3.14159265358979323846264338327950288
 #endif
 #ifndef TWO_PI
-#define TWO_PI 6.28318530717958647692f
+#define TWO_PI 6.28318530717958647692 // 2 * pi
 #endif
 #ifndef TAU
 #define TAU TWO_PI
 #endif
 #ifndef HALF_PI
-#define HALF_PI 0.636619772367581343075f
+#define HALF_PI 1.57079632679489661923132169163975144 // pi / 2
+#endif
+#ifndef QUARTER_PI
+#define QUARTER_PI 0.785398163397448309615660845819875721 // pi / 4
 #endif
 #ifndef PHI
-#define PHI 1.61803398874989484820f
+#define PHI 1.61803398874989484820
 #endif
 #ifndef INV_PHI
-#define INV_PHI 0.61803398874989484820f
+#define INV_PHI 0.61803398874989484820
 #endif
 #ifndef EULER
-#define EULER 2.71828182845904523536f
+#define EULER 2.71828182845904523536
 #endif
 #ifndef EPSILON
 #define EPSILON 0.000001f
+#endif
+#ifndef SQRT2
+#define SQRT2 1.41421356237309504880168872420969808
 #endif
 
 #if !defined(FLOAT_EQ)
@@ -92,6 +98,9 @@ extern "C" {
 #if !defined(TO_RADIANS)
 #define TO_RADIANS(DEGREES) ((DEGREES) * (PI / 180.f))
 #endif
+#if !defined(REMAP)
+#define REMAP(X, INMIN, INMAX, OUTMIN, OUTMAX) ((X) - (INMIN)) * ((OUTMAX) - (OUTMIN)) / ((INMAX) - (INMIN)) + (OUTMIN)
+#endif
 
 #if !defined(BYTES)
 #define BYTES(n) (n)
@@ -110,7 +119,7 @@ extern "C" {
 #endif
 
 #if !defined(THOUSAND)
-#define Thousand(n) ((n)*1000)
+#define THOUSAND(n) ((n)*1000)
 #endif
 #if !defined(MILLION)
 #define MILLION(n) ((n)*1000000)
