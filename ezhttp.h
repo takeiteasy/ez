@@ -59,10 +59,14 @@ extern "C" {
 #define EZHTTP_ENABLE_LOG 0
 #endif
 
+typedef struct ezResponse {
+    const char *body;
+    const char *mime;
+} ezResponse;
+
 typedef struct ezRoute {
     const char *route;
-    const char*(*callback)(void);
-    const char *mime;
+    ezResponse(*callback)(void);
 } ezRoute;
 
 typedef struct ezHTTPServerDesc {
@@ -125,17 +129,17 @@ int ezHTTPServerBegin(int port, ezRoute *routes, int *quit) {
                 break;
             // TODO: Replace this strncmp call with either a callback from user or use regex
             if (!strncmp(route->route, uri, uriLength)) {
-                const char *result = route->callback();
-                if (!result)
+                ezResponse response = route->callback();
+                if (!response.body)
                     goto BAIL;
-                if (!route->mime)
-                    route->mime = "text/html";
+                if (!response.mime)
+                    response.mime = "text/html";
                 static char header[] = "HTTP/1.0 200 OK\r\nServer: ezHTTPServer\r\nContent-type: ";
-                size_t finalLength = strlen(header) + strlen(route->mime) + strlen(result) + 7;
+                size_t finalLength = strlen(header) + strlen(response.mime) + strlen(response.body) + 7;
                 char *final = malloc(finalLength);
                 if (!final)
                     goto BAIL;
-                sprintf(final, "%s%s\r\n\r\n%s\r\n", header, "text/html", result);
+                sprintf(final, "%s%s\r\n\r\n%s\r\n", header, response.mime, response.body);
                 final[finalLength-1] = '\0';
                 write(clientSock, final, finalLength);
                 free(final);
@@ -154,23 +158,4 @@ void ezHTTPServerBeginThread(void* _args) {
     if (!ezHTTPServerBegin(args->port, args->routes, args->quit))
         perror("ezHTTPServer");
 }
-
-#if defined(EZ_DEBUG)
-static const char* TestCallback(void) {
-    return "<html>hello, world!</html>";
-}
-
-static const char* TestCallbackPath(void) {
-    return "<html><b>wow!</b></html>";
-}
-
-int main(int argc, const char *argv[]) {
-    ezRoute routes[] = {
-        { "/", TestCallback },
-        { "/test", TestCallbackPath },
-        { NULL, NULL }
-    };
-    return ezHTTPServerBegin(8080, routes, NULL);
-}
-#endif // EZ_DEBUG
 #endif // EZHTTP_IMPLEMENTATION
