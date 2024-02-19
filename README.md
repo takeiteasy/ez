@@ -14,6 +14,7 @@ If you want to use custom malloc/free calls, define ```EZ_MALLOC``` or ```EZ_FRE
 | **ezcontainer.h** | Simple immutable container format to save/load data from disk | **EZCONTAINER_IMPLEMENTATION** |
 | **ezecs.h**§      | Simple entity component system                                | **EZECS_IMPLEMENTATION**       |
 | **ezfs.h**§       | Common cross-platform file system functions                   | **EZFS_IMPLEMENTATION**        |
+| **ezhttp.h**§     | Simple embedded HTTP server                                   | **EZHTTP_IMPLEMENTATION**      |
 | **ezimage.h**     | Image manipulation, .png importing + exporting                | **EZIMAGE_IMPLEMENTATION**     |
 | **ezmap.h**§      | Simple key value map + dictionary                             | **EZMAP_IMPLEMENTATION**       |
 | **ezmath.h**\*    | Common math functions + types                                 | **EZMATH_IMPLEMENTATION**      |
