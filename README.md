@@ -20,7 +20,6 @@ If you want to use custom malloc/free calls, define ```EZ_MALLOC``` or ```EZ_FRE
 | **ezmath.h**\*    | Common math functions + types                                 | **EZMATH_IMPLEMENTATION**      |
 | **ezrng.h**       | Simple pseudo random number generation                        | **EZRNG_IMPLEMENTATION**       |
 | **ezstack.h**§    | Simple double linked-list implementation                      | **EZSTACK_IMPLEMENTATION**     |
-| **eztimer.h**‡    | Cross-platform high resolution timer                          | **EZTIMER_IMPLEMENTATION**     |
 | **ezvector.h**‡   | Stretchy buffer implementation                                | **EZVECTOR_IMPLEMENTATION**    |
 
 * **\*** Relies on clang+gcc extensions, define -fenable-matrix when building
