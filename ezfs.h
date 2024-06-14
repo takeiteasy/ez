@@ -81,15 +81,15 @@ extern "C" {
 #define PATH_SEPERATOR '\\'
 #endif
 
-int DoesFileExist(const char *path);
-int DoesDirExist(const char *path);
-char *FormatString(const char *fmt, ...);
-unsigned char *LoadFile(const char *path, size_t *length);
-const char *JoinPath(const char *a, const char *b);
-const char *UserPath(void);
-const char *CurrentDirectory(void);
+int FileExists(const char *path);
+int DirExists(const char *path);
+char* FormatString(const char *fmt, ...);
+unsigned char* LoadFile(const char *path, size_t *length);
+const char* JoinPath(const char *a, const char *b);
+const char* UserPath(void);
+const char* CurrentDirectory(void);
 int SetCurrentDirectory(const char *path);
-const char *ResolvePath(const char *path);
+const char* ResolvePath(const char *path);
 const char* FileExt(const char *path);
 const char* RemoveExt(const char* path);
 const char* FileName(const char *path);
@@ -100,11 +100,12 @@ const char* FileName(const char *path);
 #endif // EZFS_HEADER
 
 #if defined(EZFS_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
-int DoesFileExist(const char *path) {
-    return !access(path, F_OK);
+int FileExists(const char *path) {
+    struct stat sb;
+    return stat(path, &sb) == 0 && S_ISREG(sb.st_mode);
 }
 
-int DoesDirExist(const char *path) {
+int DirExists(const char *path) {
     struct stat sb;
     return stat(path, &sb) == 0 && S_ISDIR(sb.st_mode);
 }
@@ -193,7 +194,7 @@ const char* CurrentDirectory(void) {
 
 int SetCurrentDirectory(const char *path) {
     const char *rpath = ResolvePath(path);
-    if (DoesDirExist(rpath)) {
+    if (DirExists(rpath)) {
         chdir(rpath);
         return 1;
     }
@@ -201,7 +202,7 @@ int SetCurrentDirectory(const char *path) {
 }
 
 static int PathDepth(const char *path) {
-    assert(DoesDirExist(path));
+    assert(DirExists(path));
     assert(path && path[0] == '/');
     const char *cursor = path + 1;
     int depth = 0;
