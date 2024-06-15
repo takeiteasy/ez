@@ -77,8 +77,10 @@ extern "C" {
 
 #if defined(FS_PLATFORM_POSIX)
 #define PATH_SEPERATOR '/'
+#define PATH_SEPERATOR_STR "/"
 #else
 #define PATH_SEPERATOR '\\'
+#define PATH_SEPERATOR_STR "\\"
 #endif
 
 int FileExists(const char *path);
@@ -93,6 +95,7 @@ const char* ResolvePath(const char *path);
 const char* FileExt(const char *path);
 const char* RemoveExt(const char* path);
 const char* FileName(const char *path);
+const char* RemoveFileName(const char *path);
 
 #if defined(__cplusplus)
 }
@@ -203,7 +206,7 @@ int SetCurrentDirectory(const char *path) {
 
 static int PathDepth(const char *path) {
     assert(DirExists(path));
-    assert(path && path[0] == '/');
+    assert(path && path[0] == PATH_SEPERATOR);
     const char *cursor = path + 1;
     int depth = 0;
     char last = '\0';
@@ -220,7 +223,7 @@ static int PathDepth(const char *path) {
 
 static const char* PathParent(const char *path, int parent) {
     static char buf[MAX_PATH];
-    memcpy(buf, 0, MAX_PATH * sizeof(char));
+    memset(buf, 0, MAX_PATH * sizeof(char));
     int depth = PathDepth(path);
     assert(parent < depth);
     const char *cursor = path + 1;
@@ -296,13 +299,21 @@ const char* RemoveExt(const char* path) {
 
 const char* FileName(const char *path) {
     unsigned long l = 0;
-    char *tmp = strstr(path, "/");
+    char *tmp = strstr(path, PATH_SEPERATOR_STR);
     do {
         l = strlen(tmp) + 1;
         path = &path[strlen(path) - l + 2];
-        tmp = strstr(path, "/");
+        tmp = strstr(path, PATH_SEPERATOR_STR);
     } while(tmp);
     return path;
 }
 
+const char* RemoveFileName(const char *path) {
+    static char buf[MAX_PATH];
+    memcpy(buf, path, MIN(strlen(path), MAX_PATH));
+    char *p = strrchr(buf, '/');
+    if (p)
+        *p = '\0';
+    return buf;
+}
 #endif
