@@ -12,6 +12,7 @@ If you want to use custom malloc/free calls, define ```EZ_MALLOC``` or ```EZ_FRE
 | ----------------- | ------------------------------------------------------------- | ------------------------------ |
 | **ezarena.h**§    | Simple memory arena implementation using mmap+VirtualAlloc    | **EZARENA_IMPLEMENTATION**     |
 | **ezcontainer.h** | Simple immutable container format to save/load data from disk | **EZCONTAINER_IMPLEMENTATION** |
+| **ezclipboard.h** | Get/set clipboard (text only) on Mac/Windows/Linux (GTK)      | **EZCLIPBOARD_IMPLEMENTATION** |
 | **ezecs.h**§      | Simple entity component system                                | **EZECS_IMPLEMENTATION**       |
 | **ezfs.h**§       | Common cross-platform file system functions                   | **EZFS_IMPLEMENTATION**        |
 | **ezhttp.h**§     | Simple embedded HTTP server                                   | **EZHTTP_IMPLEMENTATION**      |
