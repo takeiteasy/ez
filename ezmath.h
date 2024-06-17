@@ -227,6 +227,21 @@ float EaseElasticIn(float t, float b, float c, float d);
 float EaseElasticOut(float t, float b, float c, float d);
 float EaseElasticInOut(float t, float b, float c, float d);
 
+typedef struct {
+    float x, y, w, h;
+} Box;
+
+typedef struct {
+    Vec2f position;
+    float r;
+} Circle;
+
+int PointIntersectsBox(Vec2f p, Box b);
+int PointIntersectsCircle(Vec2f p, Circle c);
+int BoxIntersectsBox(Box a, Box b);
+int CircleIntersectsBox(Circle c, Box b);
+int CircleIntersectsCircle(Circle a, Circle b);
+
 #if defined(__cplusplus)
 }
 #endif
@@ -1001,5 +1016,29 @@ float EaseElasticInOut(float t, float b, float c, float d) {
     float postFix = a * powf(2.0f, -10.0f * (t -= 1.0f));
 
     return (postFix * sinf((t * d - s) * (2.0f * PI) / p) * 0.5f + c + b);
+}
+
+int PointIntersectsBox(Vec2f p, Box b) {
+    return p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h;
+}
+
+int PointIntersectsCircle(Vec2f p, Circle c) {
+    return (p.x - c.position.x) * (p.x - c.position.x) + (p.y - c.position.y) * (p.y - c.position.y) <= c.r * c.r;
+}
+
+int BoxIntersectsBox(Box a, Box b) {
+    return b.x <= a.x + a.w && b.x + b.w >= a.x && b.y <= a.y + a.h && b.y + b.h >= a.y;
+}
+
+int CircleIntersectsBox(Circle c, Box b) {
+    Vec2f p = Vec2New(fmaxf(fminf(c.position.x, b.x + b.w), b.x),
+                      fmaxf(fminf(c.position.y, b.y + b.h), b.y));
+    return (c.position.x - p.x) * (c.position.x - p.x) + (c.position.y - p.y) * (c.position.y - p.y) <= c.r * c.r;
+}
+
+int CircleIntersectsCircle(Circle a, Circle b) {
+    float dx = a.position.x - b.position.x;
+    float dy = a.position.y - b.position.y;
+    return dx * dx + dy * dy <= (a.r + b.r) * (a.r + b.r);
 }
 #endif

@@ -323,7 +323,10 @@ int ezKVMIter(ezKVM *kvm, size_t *i, uint64_t *key, void **item) {
         bucket = BUCKET_AT(kvm, *i);
         (*i)++;
     } while (!bucket->dib);
-    *item = BUCKET_ITEM(bucket);
+    if (item)
+        *item = BUCKET_ITEM(bucket);
+    if (key)
+        *key = bucket->hash;
     return 1;
 }
 
