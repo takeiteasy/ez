@@ -49,84 +49,34 @@ extern "C" {
 #include <string.h>
 #include <math.h>
 
-#ifndef PI
 #define PI 3.14159265358979323846264338327950288
-#endif
-#ifndef TWO_PI
 #define TWO_PI 6.28318530717958647692 // 2 * pi
-#endif
-#ifndef TAU
 #define TAU TWO_PI
-#endif
-#ifndef HALF_PI
 #define HALF_PI 1.57079632679489661923132169163975144 // pi / 2
-#endif
-#ifndef QUARTER_PI
 #define QUARTER_PI 0.785398163397448309615660845819875721 // pi / 4
-#endif
-#ifndef PHI
 #define PHI 1.61803398874989484820
-#endif
-#ifndef INV_PHI
 #define INV_PHI 0.61803398874989484820
-#endif
-#ifndef EULER
 #define EULER 2.71828182845904523536
-#endif
-#ifndef EPSILON
 #define EPSILON 0.000001f
-#endif
-#ifndef SQRT2
 #define SQRT2 1.41421356237309504880168872420969808
-#endif
 
-#if !defined(FLOAT_EQ)
-#define FLOAT_EQ(A, B) ((fabsf((A) - (B))) <= (EPSILON * fmaxf(1.f, fmaxf(fabsf((A)), fabsf((B))))))
-#endif
-#if !defined(MIN)
+#define FLT_CMP(A, B) ((fabsf((A) - (B))) <= (EPSILON * fmaxf(1.f, fmaxf(fabsf((A)), fabsf((B))))))
 #define MIN(A, B) ((A) < (B) ? (A) : (B))
-#endif
-#if !defined(MAX)
 #define MAX(A, B) ((A) > (B) ? (A) : (B))
-#endif
-#if !defined(CLAMP)
 #define CLAMP(N, A, B) (MIN(MAX((N), (A)), (B)))
-#endif
-#if !defined(TO_DEGREES)
 #define TO_DEGREES(RADIANS) ((RADIANS) * (180.f / PI))
-#endif
-#if !defined(TO_RADIANS)
 #define TO_RADIANS(DEGREES) ((DEGREES) * (PI / 180.f))
-#endif
-#if !defined(REMAP)
 #define REMAP(X, INMIN, INMAX, OUTMIN, OUTMAX) ((X) - (INMIN)) * ((OUTMAX) - (OUTMIN)) / ((INMAX) - (INMIN)) + (OUTMIN)
-#endif
 
-#if !defined(BYTES)
 #define BYTES(n) (n)
-#endif
-#if !defined(KILOBYTES)
 #define KILOBYTES(n) (n << 10)
-#endif
-#if !defined(MEGABYTES)
 #define MEGABYTES(n) (n << 20)
-#endif
-#if !defined(GIGABYTES)
 #define GIGABYTES(n) (((uint64_t)n) << 30)
-#endif
-#if !defined(TERABYTES)
 #define TERABYTES(n) (((uint64_t)n) << 40)
-#endif
 
-#if !defined(THOUSAND)
 #define THOUSAND(n) ((n)*1000)
-#endif
-#if !defined(MILLION)
 #define MILLION(n) ((n)*1000000)
-#endif
-#if !defined(BILLION)
 #define BILLION(n) ((n)*1000000000LL)
-#endif
 
 #if !defined(EZ_MATH_DISABLE_MATRIX)
 #define MATRIX_TYPES \
@@ -178,7 +128,6 @@ VECTOR_TYPES
 #define QuaternionNew Vec4New
 
 typedef Vec4f Quaternion;
-typedef Vec2i Position;
 
 float Vec2Angle(Vec2f v1, Vec2f v2);
 Vec2f Vec2Rotate(Vec2f v, float angle);
@@ -346,7 +295,7 @@ MATRIX_TYPES
     {                                                                          \
         int r = 1;                                                             \
         for (int i = 0; i < L; i++)                                            \
-            if (!FLOAT_EQ(a[i], b[i]))                                         \
+            if (!FLT_CMP(a[i], b[i]))                                          \
                 return 0;                                                      \
         return r;                                                              \
     }                                                                          \

@@ -39,23 +39,23 @@ extern "C" {
 #define EZ_FREE free
 #endif
 
-typedef struct ezRandom {
+typedef struct ezRng {
     unsigned int seed;
     int p1, p2;
     unsigned int buffer[17];
-} ezRandom;
+} ezRng;
 
-ezRandom* ezRandomNew(unsigned int s);
-#define ezRandomFree(R) EZ_FREE((R))
+ezRng* ezRngNew(unsigned int s);
+#define ezRngFree(R) EZ_FREE((R))
 
-unsigned int ezRandomBits(ezRandom *r);
-float ezRandomFloat(ezRandom *r);
-double ezRandomDouble(ezRandom *r);
-#define ezRandomInt(R, __MAX) (ezRandomBits((R)) % __MAX)
+unsigned int ezRngBits(ezRng *r);
+float ezRngFloat(ezRng *r);
+double ezRngDouble(ezRng *r);
+#define ezRngInt(R, __MAX) (ezRngBits((R)) % __MAX)
 
-#define ezRandomFloatRange(R, __MIN, __MAX) (ezRandomFloat((R)) * ((__MAX) - (__MIN)) + (__MIN))
-#define ezRandomDoubleRange(R, __MIN, __MAX) (ezRandomDouble((R)) * ((__MAX) - (__MIN)) + (__MIN))
-#define ezRandomIntRange(R, __MIN, __MAX) (ezRandomBits((R)) % ((__MAX) + 1 - (__MIN)) + (__MIN))
+#define ezRngFloatRange(R, __MIN, __MAX) (ezRngFloat((R)) * ((__MAX) - (__MIN)) + (__MIN))
+#define ezRngDoubleRange(R, __MIN, __MAX) (ezRngDouble((R)) * ((__MAX) - (__MIN)) + (__MIN))
+#define ezRngIntRange(R, __MIN, __MAX) (ezRngBits((R)) % ((__MAX) + 1 - (__MIN)) + (__MIN))
 
 #if defined(__cplusplus)
 }
@@ -63,8 +63,8 @@ double ezRandomDouble(ezRandom *r);
 #endif // EZRNG_HEADER
 
 #if defined(EZRNG_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
-ezRandom* ezRandomNew(unsigned int s) {
-    ezRandom *r = EZ_MALLOC(sizeof(ezRandom));
+ezRng* ezRngNew(unsigned int s) {
+    ezRng *r = EZ_MALLOC(sizeof(ezRng));
     if (!s)
         s = (unsigned int)time(NULL);
     r->seed = s;
@@ -82,7 +82,7 @@ ezRandom* ezRandomNew(unsigned int s) {
 #endif
 #define ROTL(N, R) (((N) << (R)) | ((N) >> (32 - (R))))
 
-unsigned int ezRandomBits(ezRandom *r) {
+unsigned int ezRngBits(ezRng *r) {
     unsigned int result = r->buffer[r->p1] = ROTL(r->buffer[r->p2], 13) + ROTL(r->buffer[r->p1], 9);
 
     if (--r->p1 < 0)
@@ -93,17 +93,17 @@ unsigned int ezRandomBits(ezRandom *r) {
     return result;
 }
 
-float ezRandomFloat(ezRandom *r) {
+float ezRngFloat(ezRng *r) {
     union {
         float value;
         unsigned int word;
     } convert = {
-        .word = (ezRandomBits(r) >> 9) | 0x3F800000};
+        .word = (ezRngBits(r) >> 9) | 0x3F800000};
     return convert.value - 1.f;
 }
 
-double ezRandomDouble(ezRandom *r) {
-    unsigned int bits = ezRandomBits(r);
+double ezRngDouble(ezRng *r) {
+    unsigned int bits = ezRngBits(r);
     union {
         double value;
         unsigned int words[2];
