@@ -39,7 +39,7 @@ extern "C" {
 #include <stdlib.h>
 
 #if !defined(EZ_REALLOC)
-#define EZ_MALLOC realloc
+#define EZ_REALLOC realloc
 #endif
 #if !defined(EZ_FREE)
 #define EZ_MALLOC free
@@ -392,13 +392,15 @@ do {                                \
 #define ezVectorIntersectWhere ezVectorIntersectionWhere
 #endif
 
+void *__vector_growf(void *arr, int increment, int itemsize);
+
 #if defined(__cplusplus)
 }
 #endif
 #endif // EZVECTOR_HEADER
 
 #if defined(EZVECTOR_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
-static void *__vector_growf(void *arr, int increment, int itemsize) {
+void *__vector_growf(void *arr, int increment, int itemsize) {
     int dbl_cur = arr ? 2 * __vector_m(arr) : 0;
     int min_needed = ezVectorCount(arr) + increment;
     int m = dbl_cur > min_needed ? dbl_cur : min_needed;
