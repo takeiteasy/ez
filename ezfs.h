@@ -29,21 +29,21 @@
 extern "C" {
 #endif
 
-#define FS_PLATFORM_POSIX
+#define EZFS_PLATFORM_POSIX
 #if defined(macintosh) || defined(Macintosh) || (defined(__APPLE__) && defined(__MACH__))
-#define FS_PLATFORM_MAC
+#define EZFS_PLATFORM_MAC
 #elif defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__WINDOWS__)
-#define FS_PLATFORM_WINDOWS
-#if !defined(FS_PLATFORM_FORCE_POSIX)
-#undef FS_PLATFORM_POSIX
+#define EZFS_PLATFORM_WINDOWS
+#if !defined(EZFS_PLATFORM_FORCE_POSIX)
+#undef EZFS_PLATFORM_POSIX
 #endif
 #elif defined(__gnu_linux__) || defined(__linux__) || defined(__unix__)
-#define FS_PLATFORM_LINUX
+#define EZFS_PLATFORM_LINUX
 #else
 #error "Unsupported operating system"
 #endif
 
-#if defined(FS_PLATFORM_POSIX)
+#if defined(EZFS_PLATFORM_POSIX)
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -66,16 +66,16 @@ extern "C" {
 #endif
 
 #if !defined(MAX_PATH)
-#if defined(FS_PLATFORM_MAC)
+#if defined(EZFS_PLATFORM_MAC)
 #define MAX_PATH 255
-#elif defined(FS_PLATFORM_WINDOWS)
+#elif defined(EZFS_PLATFORM_WINDOWS)
 #define MAX_PATH 256
-#elif defined(FS_PLATFORM_LINUX)
+#elif defined(EZFS_PLATFORM_LINUX)
 #define MAX_PATH 4096
 #endif
 #endif
 
-#if defined(FS_PLATFORM_POSIX)
+#if defined(EZFS_PLATFORM_POSIX)
 #define PATH_SEPERATOR '/'
 #define PATH_SEPERATOR_STR "/"
 #else
@@ -170,7 +170,7 @@ const char* JoinPath(const char *a, const char *b) {
 const char* UserPath(void) {
     const char *result;
     if (!(result = getenv("HOME"))) {
-#if defined(FS_PLATFORM_POSIX)
+#if defined(EZFS_PLATFORM_POSIX)
         result = getpwuid(getuid())->pw_dir;
 #else
         WCHAR profilePath[MAX_PATH];

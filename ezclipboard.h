@@ -34,11 +34,11 @@ extern "C" {
 #include <string.h>
 
 #if defined(macintosh) || defined(Macintosh) || (defined(__APPLE__) && defined(__MACH__))
-#define CB_PLATFORM_MAC
+#define EZCB_PLATFORM_MAC
 #elif defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__WINDOWS__)
-#define CB_PLATFORM_WINDOWS
+#define EZCB_PLATFORM_WINDOWS
 #elif defined(__gnu_linux__) || defined(__linux__) || defined(__unix__)
-#define CB_PLATFORM_LINUX
+#define EZCB_PLATFORM_LINUX
 #else
 #error "Unsupported operating system"
 #endif
@@ -52,21 +52,21 @@ const char* ezGetClipboard(void);
 #endif // EZCLIPBOARD_HEADER
 
 #if defined(EZCLIPBOARD_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
-#if defined(CB_PLATFORM_MAC)
+#if defined(EZCB_PLATFORM_MAC)
 #import <AppKit/AppKit.h>
-#elif defined(CB_PLATFORM_WINDOWS)
+#elif defined(EZCB_PLATFORM_WINDOWS)
 #include <windows.h>
-#elif defined(CB_PLATFORM_LINUX)
+#elif defined(EZCB_PLATFORM_LINUX)
 #include <gtk/gtk.h>
 #endif
 
 int ezSetClipboard(const char *str) {
-#if defined(CB_PLATFORM_MAC)
+#if defined(EZCB_PLATFORM_MAC)
     NSPasteboard *pb = [NSPasteboard generalPasteboard];
     [pb clearContents];
     [pb setString:@(str)
           forType:NSPasteboardTypeString];
-#elif defined(CB_PLATFORM_WINDOWS)
+#elif defined(EZCB_PLATFORM_WINDOWS)
     size_t length = strlen(str);
     HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, length + 1);
     if (!hMem)
@@ -78,7 +78,7 @@ int ezSetClipboard(const char *str) {
     SetClipboardData(CF_TEXT, hMem);
     GlobalUnlock(hMem);
     CloseClipboard();
-#elif defined(CB_PLATFORM_LINUX)
+#elif defined(EZCB_PLATFORM_LINUX)
     GtkClipboard *clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     gtk_clipboard_set_text(clipboard, str, -1);
 #endif
@@ -86,14 +86,14 @@ int ezSetClipboard(const char *str) {
 }
 
 const char* ezGetClipboard(void) {
-#if defined(CB_PLATFORM_MAC)
+#if defined(EZCB_PLATFORM_MAC)
     NSPasteboard *pb = [NSPasteboard generalPasteboard];
     if ([[pb types] containsObject:NSPasteboardTypeString]) {
         NSString *text = [pb stringForType:NSPasteboardTypeString];
         return strdup([text UTF8String]);
     }
     return NULL;
-#elif defined(CB_PLATFORM_WINDOWS)
+#elif defined(EZCB_PLATFORM_WINDOWS)
     OpenClipboard(NULL);
     char *result = NULL;
     if (!IsClipboardFormatAvailable(CF_TEXT))
@@ -107,7 +107,7 @@ BAIL:
     GlobalUnlock(hMem);
     CloseClipboard();
     return result;
-#elif defined(CB_PLATFORM_LINUX)
+#elif defined(EZCB_PLATFORM_LINUX)
     GtkClipboard *clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     gchar *text = gtk_clipboard_wait_for_text(clipboard);
     return text ? strdup((char*)text) : NULL;
