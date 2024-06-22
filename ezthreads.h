@@ -326,7 +326,7 @@ int pthread_mutex_timedlock(pthread_mutex_t *mutex, const struct timespec *abs_t
     while (pthread_mutex_trylock(mtx)) {
         if (expire < time(NULL))
             return 1;
-        thrd_yield();
+        ezThreadYield();
     }
     return 0;
 }
@@ -449,7 +449,7 @@ int pthread_mutex_timedlock(pthread_mutex_t *mutex, const struct timespec *abs_t
     while (pthread_mutex_trylock(mutex)) {
         if (expire < time(NULL))
             return 1;
-        thrd_yield();
+        ezThreadYield();
     }
     return 0;
 }
