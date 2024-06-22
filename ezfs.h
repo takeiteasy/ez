@@ -30,9 +30,9 @@ extern "C" {
 #endif
 
 #define EZFS_PLATFORM_POSIX
-#if defined(macintosh) || defined(Macintosh) || (defined(__APPLE__) && defined(__MACH__))
+#if defined(__APPLE__) || defined(__MACH__)
 #define EZFS_PLATFORM_MAC
-#elif defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__WINDOWS__)
+#elif defined(_WIN32) || defined(_WIN64)
 #define EZFS_PLATFORM_WINDOWS
 #if !defined(EZFS_PLATFORM_FORCE_POSIX)
 #undef EZFS_PLATFORM_POSIX

@@ -1,10 +1,8 @@
 # ez
 
-Single header libraries mostly aimed towards game development. Recently I found myself reusing several pieces of code and often losing track of which version was the latest. So I've compiled them into single-header format to keep track easier.
+Single header libraries mostly aimed towards game development. I have had trouple keeping track of various bits of code, so I decided to consolidate them here. I add to them and modify them as I work on other stuff.
 
-Simple include the header and define ```EZ[NAME]_IMPLEMENTATION``` (or just ```EZ_IMPLEMENTATION```) in one of your source files. There are no dependencies outside of the standard library unless otherwise stated.
-
-If you want to use custom malloc/free calls, define ```EZ_MALLOC``` or ```EZ_FREE``` before including. Realloc + calloc are also defined the same way.
+These are for my personal use, however if you'd like to use any of these libraries, define ```EZ[NAME]_IMPLEMENTATION``` (or just ```EZ_IMPLEMENTATION```) in one of your source files. If you want to use custom malloc/free calls, define ```EZ_MALLOC``` or ```EZ_FREE``` before including. Realloc + calloc are also defined the same way.
 
 ## Libraries
 
@@ -21,6 +19,7 @@ If you want to use custom malloc/free calls, define ```EZ_MALLOC``` or ```EZ_FRE
 | **ezmath.h**\*    | Common math functions + types                                 | **EZMATH_IMPLEMENTATION**      |
 | **ezrng.h**       | Simple pseudo random number generation                        | **EZRNG_IMPLEMENTATION**       |
 | **ezstack.h**§    | Simple double linked-list implementation                      | **EZSTACK_IMPLEMENTATION**     |
+| **ezthreads.h**§  | pthreads wrapper for windows + thread pool implementation     | **EZTHREADS_IMPLEMENTATION**   |
 | **ezvector.h**‡   | Stretchy buffer implementation                                | **EZVECTOR_IMPLEMENTATION**    |
 
 * **\*** Relies on clang+gcc extensions, define -fenable-matrix when building

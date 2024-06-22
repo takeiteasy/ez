@@ -30,7 +30,7 @@
 extern "C" {
 #endif
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__WINDOWS__)
+#if defined(_WIN32) || defined(_WIN64)
 #define ARENA_PLATFORM_WINDOWS
 #endif
 

@@ -33,9 +33,9 @@ extern "C" {
 #include <stdint.h>
 #include <string.h>
 
-#if defined(macintosh) || defined(Macintosh) || (defined(__APPLE__) && defined(__MACH__))
+#if defined(__APPLE__) || defined(__MACH__)
 #define EZCB_PLATFORM_MAC
-#elif defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__WINDOWS__)
+#elif defined(_WIN32) || defined(_WIN64)
 #define EZCB_PLATFORM_WINDOWS
 #elif defined(__gnu_linux__) || defined(__linux__) || defined(__unix__)
 #define EZCB_PLATFORM_LINUX

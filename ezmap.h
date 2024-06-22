@@ -44,7 +44,7 @@ extern "C" {
 #define EZ_FREE free
 #endif
 
-typedef struct ezKVM {
+typedef struct ezHash {
     size_t sizeOfElements;
     size_t capacity;
     size_t sizeOfBuckets;
@@ -58,28 +58,28 @@ typedef struct ezKVM {
     void *buckets;
     void *spare;
     void *edata;
-} ezKVM;
+} ezHash;
 
-ezKVM* ezKVMNew(size_t capacity, size_t sizeOfElements);
-int ezKVMSet(ezKVM *kvm, uint64_t key, void *value);
-void* ezKVMGet(ezKVM *kvm, uint64_t key);
-void* ezKVMDel(ezKVM *kvm, uint64_t key);
-void* ezKVMProbe(ezKVM *kvm, uint64_t position);
-int ezKVMScan(ezKVM *kvm, int(*callback)(uint64_t, void*, void*), void *userdata);
-int ezKVMIter(ezKVM *kvm, size_t *i, uint64_t *key, void **item);
-void ezKVMClear(ezKVM *kvm, int adjustCapacity);
-void ezKVMFree(ezKVM *kvm);
+ezHash* ezHashNew(size_t capacity, size_t sizeOfElements);
+int ezHashSet(ezHash *kvm, uint64_t key, void *value);
+void* ezHashGet(ezHash *kvm, uint64_t key);
+void* ezHashDel(ezHash *kvm, uint64_t key);
+void* ezHashProbe(ezHash *kvm, uint64_t position);
+int ezHashScan(ezHash *kvm, int(*callback)(uint64_t, void*, void*), void *userdata);
+int ezHashIter(ezHash *kvm, size_t *i, uint64_t *key, void **item);
+void ezHashClear(ezHash *kvm, int adjustCapacity);
+void ezHashFree(ezHash *kvm);
 
-typedef ezKVM ezDictionary;
+typedef ezHash ezDictionary;
 
-#define ezDictNew(...) ezKVMNew(__VA_ARGS__)
+#define ezDictNew(...) ezHashNew(__VA_ARGS__)
 int ezDictSet(ezDictionary *dict, const char *key, void *value);
 void* ezDictGet(ezDictionary *dict, const char *key);
 void* ezDictDel(ezDictionary *dict, const char *key);
-#define ezDictScan(...) ezKVMScan(__VA_ARGS__)
-#define ezDictIter(...) ezKVMIter(__VA_ARGS__)
-#define ezDictClear(...) ezKVMClear(__VA_ARGS__)
-#define ezDictFree(...) ezKVMFree(__VA_ARGS__)
+#define ezDictScan(...) ezHashScan(__VA_ARGS__)
+#define ezDictIter(...) ezHashIter(__VA_ARGS__)
+#define ezDictClear(...) ezHashClear(__VA_ARGS__)
+#define ezDictFree(...) ezHashFree(__VA_ARGS__)
 
 uint64_t MurmurHash(const void *data, size_t len, uint32_t seed);
 
@@ -94,31 +94,31 @@ uint64_t MurmurHash(const void *data, size_t len, uint32_t seed);
 #endif
 
 #if !defined(EZ_MAP_DISABLE)
-typedef ezKVM ezMap;
+typedef ezHash ezMap;
 
-#define ezMapNew(...) ezKVMNew(__VA_ARGS__)
-#define ezMapSet(KVM, KEY, VAL) _Generic((KEY),                 \
-                                         int: ezKVMSet,         \
-                                         uint64_t: ezKVMSet,    \
-                                         char*: ezDictSet,      \
-                                         const char*: ezDictSet \
-                                        )(KVM, KEY, VAL)
-#define ezMapGet(KVM, KEY) _Generic((KEY),                 \
-                                    int: ezKVMGet,         \
-                                    uint64_t: ezKVMGet,    \
-                                    char*: ezDictGet,      \
-                                    const char*: ezDictGet \
-                                   )(KVM, KEY)
-#define ezMapDel(KVM, KEY) _Generic((KEY),                 \
-                                    int: ezKVMDel,         \
-                                    uint64_t: ezKVMDel,    \
-                                    char*: ezDictDel,      \
-                                    const char*: ezDictDel \
-                                   )(KVM, KEY)
-#define ezMapScan(...) ezKVMScan(__VA_ARGS__)
-#define ezMapIter(...) ezKVMIter(__VA_ARGS__)
-#define ezMapClear(...) ezKVMClear(__VA_ARGS__)
-#define ezMapFree(...) ezKVMFree(__VA_ARGS__)
+#define ezMapNew(...) ezHashNew(__VA_ARGS__)
+#define ezMapSet(Hash, KEY, VAL) _Generic((KEY),                 \
+                                         int: ezHashSet,         \
+                                         uint64_t: ezHashSet,    \
+                                         char*: ezDictSet,       \
+                                         const char*: ezDictSet  \
+                                        )(Hash, KEY, VAL)
+#define ezMapGet(Hash, KEY) _Generic((KEY),                 \
+                                    int: ezHashGet,         \
+                                    uint64_t: ezHashGet,    \
+                                    char*: ezDictGet,       \
+                                    const char*: ezDictGet  \
+                                   )(Hash, KEY)
+#define ezMapDel(Hash, KEY) _Generic((KEY),                 \
+                                    int: ezHashDel,         \
+                                    uint64_t: ezHashDel,    \
+                                    char*: ezDictDel,       \
+                                    const char*: ezDictDel  \
+                                   )(Hash, KEY)
+#define ezMapScan(...) ezHashScan(__VA_ARGS__)
+#define ezMapIter(...) ezHashIter(__VA_ARGS__)
+#define ezMapClear(...) ezHashClear(__VA_ARGS__)
+#define ezMapFree(...) ezHashFree(__VA_ARGS__)
 #endif
 
 #if defined(__cplusplus)
@@ -143,7 +143,7 @@ typedef struct Bucket {
 #define BUCKET_ITEM(E) (((char*)(E))+sizeof(Bucket))
 #define CLIP(H) ((H) & 0xFFFFFFFFFFFF)
 
-ezKVM* ezKVMNew(size_t capacity, size_t sizeOfElements) {
+ezHash* ezHashNew(size_t capacity, size_t sizeOfElements) {
     size_t ncap = 16;
     if (capacity < ncap)
         capacity = ncap;
@@ -157,12 +157,12 @@ ezKVM* ezKVMNew(size_t capacity, size_t sizeOfElements) {
     while (sizeOfBuckets & (sizeof(uintptr_t)-1))
         sizeOfBuckets++;
     
-    size_t size = sizeof(ezKVM) + sizeOfBuckets * 2;
-    ezKVM *result = EZ_MALLOC(size);
+    size_t size = sizeof(ezHash) + sizeOfBuckets * 2;
+    ezHash *result = EZ_MALLOC(size);
     memset(result, 0, size);
     result->sizeOfElements = sizeOfElements;
     result->sizeOfBuckets = sizeOfBuckets;
-    result->spare = (char*)result + sizeof(ezKVM);
+    result->spare = (char*)result + sizeof(ezHash);
     result->edata = (char*)result->spare + sizeOfBuckets;
     result->capacity = capacity;
     result->bucketsCount = capacity;
@@ -175,8 +175,8 @@ ezKVM* ezKVMNew(size_t capacity, size_t sizeOfElements) {
     return result;
 }
 
-static void ResizeKVM(ezKVM *kvm, size_t newCapacity) {
-    ezKVM *tmp = ezKVMNew(newCapacity, kvm->sizeOfElements);
+static void ResizeHash(ezHash *kvm, size_t newCapacity) {
+    ezHash *tmp = ezHashNew(newCapacity, kvm->sizeOfElements);
     
     for (size_t i = 0; i < kvm->bucketsCount; i++) {
         Bucket *entry = BUCKET_AT(kvm, i);
@@ -210,10 +210,10 @@ static void ResizeKVM(ezKVM *kvm, size_t newCapacity) {
     EZ_FREE(tmp);
 }
 
-int ezKVMSet(ezKVM *kvm, uint64_t key, void *value) {
+int ezHashSet(ezHash *kvm, uint64_t key, void *value) {
     uint64_t hash = CLIP(key);
     if (kvm->count >= kvm->growAt)
-        ResizeKVM(kvm, kvm->bucketsCount * (1 << kvm->growPower));
+        ResizeHash(kvm, kvm->bucketsCount * (1 << kvm->growPower));
     
     Bucket *entry = kvm->edata;
     entry->hash = hash;
@@ -249,7 +249,7 @@ int ezKVMSet(ezKVM *kvm, uint64_t key, void *value) {
     return 0;
 }
 
-void* ezKVMGet(ezKVM *kvm, uint64_t key) {
+void* ezHashGet(ezHash *kvm, uint64_t key) {
     uint64_t hash = CLIP(key);
     size_t i = hash & kvm->mask;
     for (;;) {
@@ -263,7 +263,7 @@ void* ezKVMGet(ezKVM *kvm, uint64_t key) {
     return NULL;
 }
 
-void* ezKVMDel(ezKVM *kvm, uint64_t key) {
+void* ezHashDel(ezHash *kvm, uint64_t key) {
     uint64_t hash = CLIP(key);
     size_t i = hash & kvm->mask;
     while(1) {
@@ -290,14 +290,14 @@ void* ezKVMDel(ezKVM *kvm, uint64_t key) {
             // fail to allocate enough memory because a shrink operation
             // does not change the integrity of the data.
             if (kvm->bucketsCount > kvm->capacity && --kvm->count <= kvm->shrinkAt)
-                ResizeKVM(kvm, kvm->bucketsCount/2);
+                ResizeHash(kvm, kvm->bucketsCount/2);
             return kvm->spare;
         }
         i = (i + 1) & kvm->mask;
     }
 }
 
-void* ezKVMProbe(ezKVM *kvm, uint64_t position) {
+void* ezHashProbe(ezHash *kvm, uint64_t position) {
     size_t i = position & kvm->mask;
     Bucket *bucket = BUCKET_AT(kvm, i);
     if (!bucket->dib) {
@@ -306,7 +306,7 @@ void* ezKVMProbe(ezKVM *kvm, uint64_t position) {
     return BUCKET_ITEM(bucket);
 }
 
-int ezKVMScan(ezKVM *kvm, int(*callback)(uint64_t, void*, void*), void *userdata) {
+int ezHashScan(ezHash *kvm, int(*callback)(uint64_t, void*, void*), void *userdata) {
     for (size_t i = 0; i < kvm->bucketsCount; i++) {
         Bucket *bucket = BUCKET_AT(kvm, i);
         if (bucket->dib && !callback(bucket->hash, BUCKET_ITEM(bucket), userdata))
@@ -315,7 +315,7 @@ int ezKVMScan(ezKVM *kvm, int(*callback)(uint64_t, void*, void*), void *userdata
     return 1;
 }
 
-int ezKVMIter(ezKVM *kvm, size_t *i, uint64_t *key, void **item) {
+int ezHashIter(ezHash *kvm, size_t *i, uint64_t *key, void **item) {
     Bucket *bucket;
     do {
         if (*i >= kvm->bucketsCount)
@@ -330,7 +330,7 @@ int ezKVMIter(ezKVM *kvm, size_t *i, uint64_t *key, void **item) {
     return 1;
 }
 
-void ezKVMClear(ezKVM *kvm, int adjustCapacity) {
+void ezHashClear(ezHash *kvm, int adjustCapacity) {
     kvm->count = 0;
     if (adjustCapacity)
         kvm->capacity = kvm->bucketsCount;
@@ -348,7 +348,7 @@ void ezKVMClear(ezKVM *kvm, int adjustCapacity) {
     kvm->shrinkAt = kvm->bucketsCount * SHRINK_AT;
 }
 
-void ezKVMFree(ezKVM *kvm) {
+void ezHashFree(ezHash *kvm) {
     EZ_FREE(kvm->buckets);
     EZ_FREE(kvm);
 }
@@ -448,7 +448,7 @@ uint64_t MurmurHash(const void *data, size_t len, uint32_t seed) {
 #define HASH_WRAPPER(FN, ...)                              \
 do {                                                       \
     int64_t hash = MurmurHash((void*)key, strlen(key), 0); \
-    return ezKVM##FN((ezKVM*)dict, __VA_ARGS__);           \
+    return ezHash##FN((ezHash*)dict, __VA_ARGS__);           \
 } while(0)
 
 int ezDictSet(ezDictionary *dict, const char *key, void *value) {
