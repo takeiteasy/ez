@@ -53,11 +53,11 @@ extern "C" {
 #define EZMAP_DEFAULT_CAPACITY 8
 #endif
 
+typedef struct imap_node_t imap_node_t;
+
 typedef struct {
-    union {
-        uint32_t vec32[16];
-        uint64_t vec64[8];
-    };
+    imap_node_t *tree;
+    size_t count, capacity;
 } ezKeyMap;
 
 typedef struct {
@@ -116,6 +116,13 @@ typedef ezKeyMap ezMap;
 #endif // EZMAP_HEADER
 
 #if defined(EZMAP_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
+struct imap_node_t {
+    union {
+        uint32_t vec32[16];
+        uint64_t vec64[8];
+    };
+};
+
 #define imap__tree_root__           0
 #define imap__tree_resv__           1
 #define imap__tree_mark__           2
@@ -142,7 +149,7 @@ typedef struct {
 
 #define imap__pair_zero__           ((imap_pair_t){0})
 #define imap__pair__(x, slot)       ((imap_pair_t){(x), (slot)})
-#define imap__node_zero__           ((ezKeyMap){{{0}}})
+#define imap__node_zero__           ((imap_node_t){{{0}}})
 
 #if defined(_MSC_VER)
 static inline uint32_t imap__bsr__(uint64_t x) {
@@ -179,11 +186,11 @@ static inline void imap__aligned_free__(void *p) {
 #define IMAP_ALIGNED_ALLOC(a, s)    (imap__aligned_alloc__(a, s))
 #define IMAP_ALIGNED_FREE(p)        (imap__aligned_free__(p))
 
-static inline ezKeyMap* imap__node__(ezKeyMap *tree, uint32_t val) {
-    return (ezKeyMap*)((uint8_t*)tree + val);
+static inline imap_node_t* imap__node__(imap_node_t *tree, uint32_t val) {
+    return (imap_node_t*)((uint8_t*)tree + val);
 }
 
-static inline uint32_t imap__node_pos__(ezKeyMap *node) {
+static inline uint32_t imap__node_pos__(imap_node_t *node) {
     return node->vec32[0] & 0xf;
 }
 
@@ -220,11 +227,11 @@ static inline void imap__deposit_lo4_port__(uint32_t vec32[16], uint64_t value) 
     u.vec64[7] = (u.vec64[7] & ~0xf0000000full) | ((value >> 28) & 0xf0000000full);
 }
 
-static inline void imap__node_setprefix__(ezKeyMap *node, uint64_t prefix) {
+static inline void imap__node_setprefix__(imap_node_t *node, uint64_t prefix) {
     imap__deposit_lo4_port__(node->vec32, prefix);
 }
 
-static inline uint64_t imap__node_prefix__(ezKeyMap *node) {
+static inline uint64_t imap__node_prefix__(imap_node_t *node) {
     return imap__extract_lo4_port__(node->vec32);
 }
 
@@ -247,23 +254,23 @@ static inline uint32_t imap__popcnt_hi28_port__(uint32_t vec32[16], uint32_t *p)
     return pcnt;
 }
 
-static inline uint32_t imap__node_popcnt__(ezKeyMap *node, uint32_t *p) {
+static inline uint32_t imap__node_popcnt__(imap_node_t *node, uint32_t *p) {
     return imap__popcnt_hi28_port__(node->vec32, p);
 }
 
-static inline uint32_t imap__alloc_node__(ezKeyMap *tree) {
+static inline uint32_t imap__alloc_node__(imap_node_t *tree) {
     uint32_t mark = tree->vec32[imap__tree_nfre__];
     if (mark)
         tree->vec32[imap__tree_nfre__] = *(uint32_t*)((uint8_t *)tree + mark);
     else {
         mark = tree->vec32[imap__tree_mark__];
-        assert(mark + sizeof(ezKeyMap) <= tree->vec32[imap__tree_size__]);
-        tree->vec32[imap__tree_mark__] = mark + sizeof(ezKeyMap);
+        assert(mark + sizeof(imap_node_t) <= tree->vec32[imap__tree_size__]);
+        tree->vec32[imap__tree_mark__] = mark + sizeof(imap_node_t);
     }
     return mark;
 }
 
-static inline void imap__free_node__(ezKeyMap *tree, uint32_t mark) {
+static inline void imap__free_node__(imap_node_t *tree, uint32_t mark) {
     *(uint32_t *)((uint8_t *)tree + mark) = tree->vec32[imap__tree_nfre__];
     tree->vec32[imap__tree_nfre__] = mark;
 }
@@ -272,16 +279,16 @@ static inline uint64_t imap__xpfx__(uint64_t x, uint32_t pos) {
     return x & (~0xfull << (pos << 2));
 }
 
-ezKeyMap* ezKeyMapNew(ezKeyMap *tree, size_t capacity) {
+static imap_node_t* imap_ensure(imap_node_t *tree, size_t capacity) {
     if (!capacity)
-        capacity = EZMAP_DEFAULT_CAPACITY;
-    ezKeyMap *newtree;
+        return NULL;
+    imap_node_t *newtree;
     uint32_t hasnfre, hasvfre, newmark, oldsize, newsize;
     uint64_t newsize64;
     if (!tree) {
         hasnfre = 0;
         hasvfre = 1;
-        newmark = sizeof(ezKeyMap);
+        newmark = sizeof(imap_node_t);
         oldsize = 0;
     } else {
         hasnfre = !!tree->vec32[imap__tree_nfre__];
@@ -289,14 +296,14 @@ ezKeyMap* ezKeyMapNew(ezKeyMap *tree, size_t capacity) {
         newmark = tree->vec32[imap__tree_mark__];
         oldsize = tree->vec32[imap__tree_size__];
     }
-    newmark += (capacity * 2 - hasnfre) * sizeof(ezKeyMap) + (capacity - hasvfre) * sizeof(uint64_t);
+    newmark += (capacity * 2 - hasnfre) * sizeof(imap_node_t) + (capacity - hasvfre) * sizeof(uint64_t);
     if (newmark <= oldsize)
         return tree;
     newsize64 = imap__ceilpow2__(newmark);
     if (0x20000000 < newsize64)
         return NULL;
     newsize = (uint32_t)newsize64;
-    newtree = (ezKeyMap*)IMAP_ALIGNED_ALLOC(sizeof(ezKeyMap), newsize);
+    newtree = (imap_node_t*)IMAP_ALIGNED_ALLOC(sizeof(imap_node_t), newsize);
     if (!newtree)
         return newtree;
     if (tree) {
@@ -306,7 +313,7 @@ ezKeyMap* ezKeyMapNew(ezKeyMap *tree, size_t capacity) {
     } else {
         newtree->vec32[imap__tree_root__] = 0;
         newtree->vec32[imap__tree_resv__] = 0;
-        newtree->vec32[imap__tree_mark__] = sizeof(ezKeyMap);
+        newtree->vec32[imap__tree_mark__] = sizeof(imap_node_t);
         newtree->vec32[imap__tree_size__] = newsize;
         newtree->vec32[imap__tree_nfre__] = 0;
         newtree->vec32[imap__tree_vfre__] = 3 << imap__slot_shift__;
@@ -319,11 +326,21 @@ ezKeyMap* ezKeyMapNew(ezKeyMap *tree, size_t capacity) {
     return newtree;
 }
 
-static uint32_t* find(ezKeyMap *tree, uint64_t x, int ensure) {
+ezKeyMap* ezKeyMapNew(ezKeyMap *old, size_t capacity) {
+    ezKeyMap *result = EZ_MALLOC(sizeof(ezKeyMap));
+    if (!capacity)
+        capacity = EZMAP_DEFAULT_CAPACITY;
+    result->capacity = capacity;
+    result->count = 0;
+    result->tree = imap_ensure(NULL, capacity);
+    return result;
+}
+
+static uint32_t* find(imap_node_t *tree, uint64_t x, int ensure) {
     uint32_t *slotstack[16 + 1];
     uint32_t posnstack[16 + 1];
     uint32_t stackp, stacki;
-    ezKeyMap *newnode, *node = tree;
+    imap_node_t *newnode, *node = tree;
     uint32_t *slot;
     uint32_t newmark, sval, diff, posn = 16, dirn = 0;
     uint64_t prfx;
@@ -368,9 +385,9 @@ static uint32_t* find(ezKeyMap *tree, uint64_t x, int ensure) {
     }
 }
 
-static inline uint32_t imap__alloc_val__(ezKeyMap *tree) {
+static inline uint32_t imap__alloc_val__(imap_node_t *tree) {
     uint32_t mark = imap__alloc_node__(tree);
-    ezKeyMap *node = imap__node__(tree, mark);
+    imap_node_t *node = imap__node__(tree, mark);
     mark <<= 3;
     tree->vec32[imap__tree_vfre__] = mark;
     node->vec64[0] = mark + (1 << imap__slot_shift__);
@@ -384,11 +401,10 @@ static inline uint32_t imap__alloc_val__(ezKeyMap *tree) {
     return mark;
 }
 
-static void imap_setval64(ezKeyMap *tree, uint32_t *slot, uint64_t y) {
+static void imap_setval64(imap_node_t *tree, uint32_t *slot, uint64_t y) {
     assert(!(*slot & imap__slot_node__));
     uint32_t sval = *slot;
-    if (!(sval >> imap__slot_shift__))
-    {
+    if (!(sval >> imap__slot_shift__)) {
         sval = tree->vec32[imap__tree_vfre__];
         if (!sval)
             sval = imap__alloc_val__(tree);
@@ -402,14 +418,14 @@ static void imap_setval64(ezKeyMap *tree, uint32_t *slot, uint64_t y) {
 }
 
 int ezKeyMapSet(ezKeyMap *map, uint64_t key, void *item) {
-    uint32_t *slot = find(map, key, 1);
+    uint32_t *slot = find(map->tree, key, 1);
     if (!slot)
         return 0;
-    imap_setval64(map, slot, (uint64_t)item);
+    imap_setval64(map->tree, slot, (uint64_t)item);
     return 1;
 }
 
-static uint64_t imap_getval(ezKeyMap *tree, uint32_t *slot) {
+static uint64_t imap_getval(imap_node_t *tree, uint32_t *slot) {
     assert(!(*slot & imap__slot_node__));
     uint32_t sval = *slot;
     if (!imap__slot_boxed__(sval))
@@ -419,11 +435,11 @@ static uint64_t imap_getval(ezKeyMap *tree, uint32_t *slot) {
 }
 
 void* ezKeyMapGet(ezKeyMap *map, uint64_t key) {
-    uint32_t *slot = find(map, key, 0);
-    return slot ? (void*)imap_getval(map, slot) : NULL;
+    uint32_t *slot = find(map->tree, key, 0);
+    return slot ? (void*)imap_getval(map->tree, slot) : NULL;
 }
 
-static void imap_delval(ezKeyMap *tree, uint32_t *slot) {
+static void imap_delval(imap_node_t *tree, uint32_t *slot) {
     assert(!(*slot & imap__slot_node__));
     uint32_t sval = *slot;
     if (imap__slot_boxed__(sval)) {
@@ -433,26 +449,22 @@ static void imap_delval(ezKeyMap *tree, uint32_t *slot) {
     *slot &= imap__slot_pmask__;
 }
 
-static void imap_remove(ezKeyMap *tree, uint64_t x) {
+static void imap_remove(imap_node_t *tree, uint64_t x) {
     uint32_t *slotstack[16 + 1];
     uint32_t stackp;
-    ezKeyMap *node = tree;
+    imap_node_t *node = tree;
     uint32_t *slot;
     uint32_t sval, pval, posn = 16, dirn = 0;
     stackp = 0;
-    for (;;)
-    {
+    for (;;) {
         slot = &node->vec32[dirn];
         sval = *slot;
-        if (!(sval & imap__slot_node__))
-        {
-            if ((sval & imap__slot_value__) && imap__node_prefix__(node) == (x & ~0xfull))
-            {
+        if (!(sval & imap__slot_node__)) {
+            if ((sval & imap__slot_value__) && imap__node_prefix__(node) == (x & ~0xfull)) {
                 assert(0 == posn);
                 imap_delval(tree, slot);
             }
-            while (stackp)
-            {
+            while (stackp) {
                 slot = slotstack[--stackp];
                 sval = *slot;
                 node = imap__node__(tree, sval & imap__slot_value__);
@@ -472,16 +484,16 @@ static void imap_remove(ezKeyMap *tree, uint64_t x) {
 }
 
 void* ezKeyMapDel(ezKeyMap *map, uint64_t key) {
-    uint32_t *slot = find(map, key, 0);
+    uint32_t *slot = find(map->tree, key, 0);
     if (!slot)
         return NULL;
-    void* val = (void*)imap_getval(map, slot);
-    imap_remove(map, key);
+    void* val = (void*)imap_getval(map->tree, slot);
+    imap_remove(map->tree, key);
     return val;
 }
 
-static imap_pair_t imap_iterate(ezKeyMap *tree, imap_iter_t *iter, int restart) {
-    ezKeyMap *node;
+static imap_pair_t imap_iterate(imap_node_t *tree, imap_iter_t *iter, int restart) {
+    imap_node_t *node;
     uint32_t *slot;
     uint32_t sval, dirn;
     if (restart) {
@@ -514,14 +526,14 @@ static imap_pair_t imap_iterate(ezKeyMap *tree, imap_iter_t *iter, int restart) 
 
 int ezKeyMapEach(ezKeyMap *map, int(*callback)(ezKeyValuePair *pair, size_t)) {
     imap_iter_t iter;
-    imap_pair_t pair = imap_iterate(map, &iter, 1);
+    imap_pair_t pair = imap_iterate(map->tree, &iter, 1);
     size_t i = 0;
     ezKeyValuePair ezpair;
     for (;;) {
         if (!pair.slot)
             break;
         ezpair.key = pair.x;
-        ezpair.val = (void*)imap_getval(map, pair.slot);
+        ezpair.val = (void*)imap_getval(map->tree, pair.slot);
         int result = callback(&ezpair, i++);
         if (result)
             return result;
@@ -530,7 +542,8 @@ int ezKeyMapEach(ezKeyMap *map, int(*callback)(ezKeyValuePair *pair, size_t)) {
 }
 
 void ezKeyMapFree(ezKeyMap *map) {
-    IMAP_ALIGNED_FREE(map);
+    IMAP_ALIGNED_FREE(map->tree);
+    EZ_FREE(map);
 }
 
 static void MM86128(const void *key, const int len, uint32_t seed, void *out) {

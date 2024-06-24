@@ -160,6 +160,22 @@ void ezThreadPoolDestroy(ezThreadPool *pool);
 int ezThreadPoolAddWork(ezThreadPool *pool, void(*func)(void*), void *arg);
 void ezThreadPoolJoin(ezThreadPool *pool);
 
+typedef struct ezThreadQueueItem {
+    void *data;
+    struct ezThreadQueueItem *next;
+} ezThreadQueueItem;
+
+typedef struct {
+    ezThreadQueueItem *head, *tail;
+    pthread_mutex_t readLock, writeLock;
+    size_t count;
+} ezThreadQueue;
+
+ezThreadQueue* ezThreadQueueNew(void);
+void ezThreadQueuePush(ezThreadQueue *queue, void *data);
+void* ezThreadQueuePop(ezThreadQueue *queue);
+void ezThreadQueueFree(ezThreadQueue *queue);
+
 #if defined(__cplusplus)
 }
 #endif
@@ -570,5 +586,62 @@ void ezThreadPoolJoin(ezThreadPool *pool) {
         else
             break;
     pthread_mutex_unlock(&pool->workMutex);
+}
+
+ezThreadQueue* ezThreadQueueNew(void) {
+    ezThreadQueue *queue = EZ_MALLOC(sizeof(ezThreadQueue));
+    queue->head = NULL;
+    queue->tail = NULL;
+    queue->count = 0;
+    pthread_mutex_init(&queue->readLock, NULL);
+    pthread_mutex_init(&queue->writeLock, NULL);
+    pthread_mutex_lock(&queue->readLock);
+    return queue;
+}
+
+void ezThreadQueuePush(ezThreadQueue *queue, void *data) {
+    ezThreadQueueItem *item = EZ_MALLOC(sizeof(ezThreadQueueItem));
+    item->data = data;
+    item->next = NULL;
+    
+    pthread_mutex_lock(&queue->writeLock);
+    if (queue->head) {
+        queue->head = item;
+        queue->tail = item;
+    } else {
+        queue->tail->next = item;
+        queue->tail = item;
+    }
+    queue->count++;
+    
+    pthread_mutex_unlock(&queue->readLock);
+    pthread_mutex_unlock(&queue->writeLock);
+}
+
+void* ezThreadQueuePop(ezThreadQueue *queue) {
+    if (!queue->head)
+        return NULL;
+    
+    pthread_mutex_lock(&queue->readLock);
+    pthread_mutex_lock(&queue->writeLock);
+    
+    void *result = queue->head->data;
+    ezThreadQueueItem *tmp = queue->head;
+    if (!(queue->head = tmp->next))
+        queue->tail = NULL;
+    EZ_FREE(tmp);
+    
+    if (--queue->count)
+        pthread_mutex_unlock(&queue->readLock);
+    pthread_mutex_unlock(&queue->writeLock);
+    
+    return result;
+}
+
+void ezThreadQueueFree(ezThreadQueue *queue) {
+    // TODO: Handle mutexes + clear queue first
+    pthread_mutex_destroy(&queue->readLock);
+    pthread_mutex_destroy(&queue->writeLock);
+    EZ_FREE(queue);
 }
 #endif // EZ_IMPLEMENTATION
