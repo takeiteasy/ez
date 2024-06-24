@@ -249,9 +249,9 @@ do {                                \
             else {                                 \
                 ezVectorPush(result, _a[y]);       \
                 x[j++] = y;                        \
-            }                                     \
-        }                                         \
-        return result;                            \
+            }                                      \
+        }                                          \
+        return result;                             \
     }(a)
 
 // Return new sub-vector from min-max range

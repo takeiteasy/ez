@@ -336,11 +336,11 @@ ezKeyMap* ezKeyMapNew(ezKeyMap *old, size_t capacity) {
     return result;
 }
 
-static uint32_t* find(imap_node_t *tree, uint64_t x, int ensure) {
+static uint32_t* find(ezKeyMap *map, uint64_t x, int ensure) {
     uint32_t *slotstack[16 + 1];
     uint32_t posnstack[16 + 1];
     uint32_t stackp, stacki;
-    imap_node_t *newnode, *node = tree;
+    imap_node_t *newnode, *node = map->tree;
     uint32_t *slot;
     uint32_t newmark, sval, diff, posn = 16, dirn = 0;
     uint64_t prfx;
@@ -354,6 +354,10 @@ static uint32_t* find(imap_node_t *tree, uint64_t x, int ensure) {
             prfx = imap__node_prefix__(node);
             if (!ensure || (!posn && prfx == (x & ~0xfull)))
                 return slot;
+            if (++map->count > map->capacity) {
+                map->capacity *= 2;
+                map->tree = imap_ensure(map->tree, map->capacity);
+            }
             diff = imap__xpos__(prfx ^ x);
             assert(diff < 16);
             for (stacki = stackp; diff > posn;)
@@ -362,24 +366,24 @@ static uint32_t* find(imap_node_t *tree, uint64_t x, int ensure) {
                 slot = slotstack[stacki];
                 sval = *slot;
                 assert(sval & imap__slot_node__);
-                newmark = imap__alloc_node__(tree);
+                newmark = imap__alloc_node__(map->tree);
                 *slot = (*slot & imap__slot_pmask__) | imap__slot_node__ | newmark;
-                newnode = imap__node__(tree, newmark);
+                newnode = imap__node__(map->tree, newmark);
                 *newnode = imap__node_zero__;
-                newmark = imap__alloc_node__(tree);
+                newmark = imap__alloc_node__(map->tree);
                 newnode->vec32[imap__xdir__(prfx, diff)] = sval;
                 newnode->vec32[imap__xdir__(x, diff)] = imap__slot_node__ | newmark;
                 imap__node_setprefix__(newnode, imap__xpfx__(prfx, diff) | diff);
             } else {
-                newmark = imap__alloc_node__(tree);
+                newmark = imap__alloc_node__(map->tree);
                 *slot = (*slot & imap__slot_pmask__) | imap__slot_node__ | newmark;
             }
-            newnode = imap__node__(tree, newmark);
+            newnode = imap__node__(map->tree, newmark);
             *newnode = imap__node_zero__;
             imap__node_setprefix__(newnode, x & ~0xfull);
             return &newnode->vec32[x & 0xfull];
         }
-        node = imap__node__(tree, sval & imap__slot_value__);
+        node = imap__node__(map->tree, sval & imap__slot_value__);
         posn = imap__node_pos__(node);
         dirn = imap__xdir__(x, posn);
     }
@@ -418,7 +422,7 @@ static void imap_setval64(imap_node_t *tree, uint32_t *slot, uint64_t y) {
 }
 
 int ezKeyMapSet(ezKeyMap *map, uint64_t key, void *item) {
-    uint32_t *slot = find(map->tree, key, 1);
+    uint32_t *slot = find(map, key, 1);
     if (!slot)
         return 0;
     imap_setval64(map->tree, slot, (uint64_t)item);
@@ -435,7 +439,7 @@ static uint64_t imap_getval(imap_node_t *tree, uint32_t *slot) {
 }
 
 void* ezKeyMapGet(ezKeyMap *map, uint64_t key) {
-    uint32_t *slot = find(map->tree, key, 0);
+    uint32_t *slot = find(map, key, 0);
     return slot ? (void*)imap_getval(map->tree, slot) : NULL;
 }
 
@@ -484,11 +488,14 @@ static void imap_remove(imap_node_t *tree, uint64_t x) {
 }
 
 void* ezKeyMapDel(ezKeyMap *map, uint64_t key) {
-    uint32_t *slot = find(map->tree, key, 0);
+    if (!map->count)
+        return NULL;
+    uint32_t *slot = find(map, key, 0);
     if (!slot)
         return NULL;
     void* val = (void*)imap_getval(map->tree, slot);
     imap_remove(map->tree, key);
+    map->count--;
     return val;
 }
 
@@ -636,7 +643,7 @@ uint64_t MurmurHash(const void *data, size_t len, uint32_t seed) {
 #define HASH_WRAPPER(FN, ...)                              \
 do {                                                       \
     int64_t hash = MurmurHash((void*)key, strlen(key), 0); \
-    return ezKeyMap##FN((ezKeyMap*)dict, __VA_ARGS__);         \
+    return ezKeyMap##FN((ezKeyMap*)dict, __VA_ARGS__);     \
 } while(0)
 
 int ezDictSet(ezDict *dict, const char *key, void *value) {
