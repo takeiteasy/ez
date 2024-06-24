@@ -542,8 +542,10 @@ int ezKeyMapEach(ezKeyMap *map, int(*callback)(ezKeyValuePair *pair, size_t, voi
         ezpair.key = pair.x;
         ezpair.val = (void*)imap_getval(map->tree, pair.slot);
         int result = callback(&ezpair, i++, userdata);
-        if (result)
+        if (!result)
             return result;
+        else
+            pair = imap_iterate(map->tree, &iter, 0);
     }
     return 0;
 }

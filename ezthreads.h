@@ -158,6 +158,8 @@ typedef struct {
 ezThreadPool* ezThreadPoolNew(size_t maxThreads);
 void ezThreadPoolDestroy(ezThreadPool *pool);
 int ezThreadPoolAddWork(ezThreadPool *pool, void(*func)(void*), void *arg);
+// Adds work to the front of the queue
+int ezThreadPoolAddPriorityWork(ezThreadPool *pool, void(*func)(void*), void *arg);
 void ezThreadPoolJoin(ezThreadPool *pool);
 
 typedef struct ezThreadQueueItem {
@@ -576,6 +578,24 @@ int ezThreadPoolAddWork(ezThreadPool *pool, void(*func)(void*), void *arg) {
     return 1;
 }
 
+int ezThreadPoolAddPriorityWork(ezThreadPool *pool, void(*func)(void*), void *arg) {
+    ezThreadWork *work = EZ_MALLOC(sizeof(ezThreadWork));
+    work->arg = arg;
+    work->func = func;
+    work->next = NULL;
+    pthread_mutex_lock(&pool->workMutex);
+    if (!pool->head) {
+        pool->head = work;
+        pool->tail = pool->head;
+    } else {
+        work->next = pool->head;
+        pool->head = work;
+    }
+    pthread_cond_broadcast(&pool->workCond);
+    pthread_mutex_unlock(&pool->workMutex);
+    return 1;
+}
+
 void ezThreadPoolJoin(ezThreadPool *pool) {
     pthread_mutex_lock(&pool->workMutex);
     for (;;)
@@ -607,7 +627,7 @@ void ezThreadQueuePush(ezThreadQueue *queue, void *data) {
     pthread_mutex_lock(&queue->writeLock);
     if (!queue->head) {
         queue->head = item;
-        queue->tail = item;
+        queue->tail = queue->head;
     } else {
         queue->tail->next = item;
         queue->tail = item;
