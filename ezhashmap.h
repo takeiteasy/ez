@@ -70,7 +70,7 @@ int ezKeyMapSet(ezKeyMap *map, uint64_t key, void *value);
 void* ezKeyMapGet(ezKeyMap *map, uint64_t key);
 void* ezKeyMapDel(ezKeyMap *map, uint64_t key);
 int ezKeyMapEach(ezKeyMap *map, int(*callback)(ezKeyValuePair *pair, size_t));
-void ezKeyMapFree(ezKeyMap *map);
+void ezKeyMapDestroy(ezKeyMap *map);
 
 typedef ezKeyMap ezDictionary;
 typedef ezKeyMap ezDict;
@@ -80,7 +80,7 @@ int ezDictSet(ezDict *dict, const char *key, void *value);
 void* ezDictGet(ezDict *dict, const char *key);
 void* ezDictDel(ezDict *dict, const char *key);
 #define ezDictEach(...) ezKeyMapIter(__VA_ARGS__)
-#define ezDictFree(...) ezKeyMapFree(__VA_ARGS__)
+#define ezDictDestroy(...) ezKeyMapDestroy(__VA_ARGS__)
 
 uint64_t MurmurHash(const void *data, size_t len, uint32_t seed);
 
@@ -107,7 +107,7 @@ typedef ezKeyMap ezMap;
                                     const char*: ezDictDel      \
                                    )(Hash, KEY)
 #define ezMapEach(...) ezKeyMapEach(__VA_ARGS__)
-#define ezMapFree(...) ezKeyMapFree(__VA_ARGS__)
+#define ezMapDestroy(...) ezKeyMapDestroy(__VA_ARGS__)
 #endif
 
 #if defined(__cplusplus)
@@ -548,7 +548,7 @@ int ezKeyMapEach(ezKeyMap *map, int(*callback)(ezKeyValuePair *pair, size_t)) {
     return 0;
 }
 
-void ezKeyMapFree(ezKeyMap *map) {
+void ezKeyMapDestroy(ezKeyMap *map) {
     IMAP_ALIGNED_FREE(map->tree);
     EZ_FREE(map);
 }

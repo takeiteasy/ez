@@ -174,7 +174,7 @@ typedef struct {
 ezThreadQueue* ezThreadQueueNew(void);
 void ezThreadQueuePush(ezThreadQueue *queue, void *data);
 void* ezThreadQueuePop(ezThreadQueue *queue);
-void ezThreadQueueFree(ezThreadQueue *queue);
+void ezThreadQueueDestroy(ezThreadQueue *queue);
 
 #if defined(__cplusplus)
 }
@@ -605,7 +605,7 @@ void ezThreadQueuePush(ezThreadQueue *queue, void *data) {
     item->next = NULL;
     
     pthread_mutex_lock(&queue->writeLock);
-    if (queue->head) {
+    if (!queue->head) {
         queue->head = item;
         queue->tail = item;
     } else {
@@ -638,7 +638,7 @@ void* ezThreadQueuePop(ezThreadQueue *queue) {
     return result;
 }
 
-void ezThreadQueueFree(ezThreadQueue *queue) {
+void ezThreadQueueDestroy(ezThreadQueue *queue) {
     // TODO: Handle mutexes + clear queue first
     pthread_mutex_destroy(&queue->readLock);
     pthread_mutex_destroy(&queue->writeLock);
