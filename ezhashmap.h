@@ -42,48 +42,6 @@ extern "C" {
 #include <string.h>
 #include <stdint.h>
 
-#ifdef __clang__
-#define EZMAP_COMPILER clang
-#elif defined(__GNUC__) || defined(__GNUG__)
-#define EZMAP_COMPILER GCC
-#else
-#define EZMAP_DISABLE_INT128
-#define EZMAP_DISABLE_GENERICS
-#endif
-
-#if !defined(EZMAP_DISABLE_INT128) || (defined(INT128) || defined(UINT128))
-#pragma EZMAP_COMPILER diagnostic push
-#pragma EZMAP_COMPILER diagnostic ignored "-Wpragmas"
-#pragma EZMAP_COMPILER diagnostic ignored "-Wpedantic"
-#pragma EZMAP_COMPILER diagnostic ignored "-pedantic"
-typedef unsigned __int128 uint128_t;
-#pragma EZMAP_COMPILER diagnostic pop
-
-#ifndef UINT128
-#define UINT128(n) ((uint128_t)n)
-#endif
-#ifndef UINT128_MAX
-#define UINT128_MAX (~UINT128(0))
-#endif
-
-#pragma EZMAP_COMPILER diagnostic push
-#pragma EZMAP_COMPILER diagnostic ignored "-Wpragmas"
-#pragma EZMAP_COMPILER diagnostic ignored "-Wpedantic"
-#pragma EZMAP_COMPILER diagnostic ignored "-pedantic"
-typedef __int128 int128_t;
-#pragma EZMAP_COMPILER diagnostic pop
-
-#ifndef INT128
-#define INT128(n) ((int128_t)n)
-#endif
-#ifndef UINT128_MAX
-#define INT128_MAX ((int128_t)(UINT128_MAX >> 1))
-#endif
-#ifndef INT128_MIN
-#define INT128_MIN (-INT128_MAX - 1)
-#endif
-#endif
-
 #if !defined(EZ_MALLOC)
 #define EZ_MALLOC malloc
 #endif
@@ -99,9 +57,6 @@ typedef struct {
     union {
         uint32_t vec32[16];
         uint64_t vec64[8];
-#ifndef EZMAP_DISABLE_INT128
-        uint128_t vec128[4];
-#endif
     };
 } ezKeyMap;
 
@@ -683,4 +638,3 @@ void* ezDictDel(ezDict *dict, const char *key) {
     HASH_WRAPPER(Del, hash);
 }
 #endif
-
