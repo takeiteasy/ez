@@ -6,26 +6,23 @@ These are for my personal use, however if you'd like to use any of these librari
 
 ## Libraries
 
-| File              | Description                                                   | Define                         |
-| ----------------- | ------------------------------------------------------------- | ------------------------------ |
-| **ezarena.h**§    | Simple memory arena implementation using mmap+VirtualAlloc    | **EZARENA_IMPLEMENTATION**     |
-| **ezcontainer.h** | Simple immutable container format to save/load data from disk | **EZCONTAINER_IMPLEMENTATION** |
-| **ezclipboard.h** | Get/set clipboard (text only) on Mac/Windows/Linux (GTK)      | **EZCLIPBOARD_IMPLEMENTATION** |
-| **ezecs.h**§      | Simple entity component system                                | **EZECS_IMPLEMENTATION**       |
-| **ezfs.h**§       | Common cross-platform file system functions                   | **EZFS_IMPLEMENTATION**        |
-| **ezhttp.h**§     | Simple embedded HTTP server                                   | **EZHTTP_IMPLEMENTATION**      |
-| **ezimage.h**     | Image manipulation, .png importing + exporting                | **EZIMAGE_IMPLEMENTATION**     |
-| **ezmap.h**§      | Simple key value map + dictionary                             | **EZMAP_IMPLEMENTATION**       |
-| **ezmath.h**\*    | Common math functions + types                                 | **EZMATH_IMPLEMENTATION**      |
-| **ezrng.h**       | Simple pseudo random number generation                        | **EZRNG_IMPLEMENTATION**       |
-| **ezstack.h**§    | Simple double linked-list implementation                      | **EZSTACK_IMPLEMENTATION**     |
-| **ezthreads.h**§  | pthreads wrapper for windows + thread pool implementation     | **EZTHREADS_IMPLEMENTATION**   |
-| **ezvector.h**‡   | Stretchy buffer implementation                                | **EZVECTOR_IMPLEMENTATION**    |
+| File               | Description                                                   | Define                         |
+| -----------------  | ------------------------------------------------------------- | ------------------------------ |
+| **ezarena.h**      | Simple memory arena implementation using mmap+VirtualAlloc    | **EZARENA_IMPLEMENTATION**     |
+| **ezclipboard.h**† | Get/set clipboard (text only) on Mac/Windows/Linux (GTK)      | **EZCLIPBOARD_IMPLEMENTATION** |
+| **ezfs.h**†        | Common cross-platform file system functions                   | **EZFS_IMPLEMENTATION**        |
+| **ezhttp.h**†      | Simple embedded HTTP server                                   | **EZHTTP_IMPLEMENTATION**      |
+| **ezimage.h**      | Image manipulation, .png importing + exporting                | **EZIMAGE_IMPLEMENTATION**     |
+| **ezmap.h**‡       | Simple key value map + dictionary                             | **EZMAP_IMPLEMENTATION**       |
+| **ezmath.h**‡      | Common math functions + types                                 | **EZMATH_IMPLEMENTATION**      |
+| **ezrng.h**†       | Simple pseudo random number generation                        | **EZRNG_IMPLEMENTATION**       |
+| **ezstack.h**      | Simple double linked-list implementation                      | **EZSTACK_IMPLEMENTATION**     |
+| **ezthreads.h**    | pthreads wrapper for windows + thread pool implementation     | **EZTHREADS_IMPLEMENTATION**   |
+| **ezvector.h**‡    | Stretchy buffer implementation                                | **EZVECTOR_IMPLEMENTATION**    |
 
-* **\*** Relies on clang+gcc extensions, define -fenable-matrix when building
-* **†** Requires linking to external dependencies
-* **‡** Some functionality relies on clang+gcc
-* **§** Work in progress, expect massive changes
+* **** Requires linking to external dependencies
+* **‡** Some functionality relies on clang+gcc extensions
+* **†** Work in progress, expect massive changes
 
 ## LICENSE
 ```

@@ -1,6 +1,9 @@
 /* ezclipboard.h -- Cross-platform set/get text from/to clipboard
  https://github.com/takeiteasy/
  
+ TODO:
+ - Emscripten clipboard support
+ 
  The MIT License (MIT)
 
  Copyright (c) 2022 George Watson

@@ -1,4 +1,4 @@
-/* ezhashmap.h - Simple key value map + dictionary (WIP)
+/* ezmap.h - Simple key value map + dictionary 
    https://github.com/takeiteasy/
   
  The MIT License (MIT)
@@ -116,6 +116,8 @@ typedef ezKeyMap ezMap;
 #endif // EZMAP_HEADER
 
 #if defined(EZMAP_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
+#include <assert.h>
+
 struct imap_node_t {
     union {
         uint32_t vec32[16];

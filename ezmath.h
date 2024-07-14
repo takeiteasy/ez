@@ -78,48 +78,51 @@ extern "C" {
 #define MILLION(n) ((n)*1000000)
 #define BILLION(n) ((n)*1000000000LL)
 
-#if !defined(EZ_MATH_DISABLE_MATRIX)
-#define MATRIX_TYPES \
-    X(2, 2)          \
-    X(3, 3)          \
-    X(4, 4)
+#define EZ_MATH_DEF \
+    X(2)            \
+    X(3)            \
+    X(4)
 
-#define __MATRIX_T(W, H) Mat##W##H
-#define __MATRIX_D(W, H, F) Mat##W##H##F
-#define X(W, H)                                                        \
-    typedef float __MATRIX_T(W, H) __attribute__((matrix_type(W, H))); \
-    __MATRIX_T(W, H) __MATRIX_D(W, H, Identity)(void);                 \
-    float __MATRIX_D(W, H, Trace)(__MATRIX_T(W, H));                   \
-    __MATRIX_T(W, H) __MATRIX_D(W, H, Zero)(void);
-MATRIX_TYPES
+#if !defined(EZ_MATH_DISABLE_MATRIX)
+#define __MATRIX_T(N) Mat##N
+#define __MATRIX_D(N, F) Mat##N##F
+#define X(N)                                                        \
+    typedef float __MATRIX_T(N) __attribute__((matrix_type(N, N))); \
+    __MATRIX_T(N)                                                   \
+    __MATRIX_D(N, Identity)(void);                                  \
+    float __MATRIX_D(N, Trace)(__MATRIX_T(N));                      \
+    __MATRIX_T(N)                                                   \
+    __MATRIX_D(N, Zero)(void);
+    EZ_MATH_DEF
 #undef X
 #endif
 
-#define VECTOR_TYPES \
-    X(2)             \
-    X(3)             \
-    X(4)
-
 #define __VEC_T(L) Vec##L##f
 #define __VEC_D(L, F) Vec##L##F
-#define X(L)                                                                    \
-    typedef float __VEC_T(L) __attribute__((ext_vector_type(L)));               \
-    typedef int Vec##L##i __attribute__((ext_vector_type(L)));                  \
-    __VEC_T(L) __VEC_D(L, Zero)(void);                                          \
-    void __VEC_D(L, Print)(__VEC_T(L) v);                                       \
-    float __VEC_D(L, Sum)(__VEC_T(L) v);                                        \
-    int __VEC_D(L, Equals)(__VEC_T(L) a, __VEC_T(L) b);                         \
-    float __VEC_D(L, LengthSqr)(__VEC_T(L) v);                                  \
-    float __VEC_D(L, Length)(__VEC_T(L) v);                                     \
-    float __VEC_D(L, Dot)(__VEC_T(L) v1, __VEC_T(L) v2);                        \
-    __VEC_T(L) __VEC_D(L, Normalize)(__VEC_T(L) v);                             \
-    float __VEC_D(L, DistSqr)(__VEC_T(L) v1, __VEC_T(L) v2);                    \
-    float __VEC_D(L, Dist)(__VEC_T(L) v1, __VEC_T(L) v2);                       \
-    __VEC_T(L) __VEC_D(L, Clamp)(__VEC_T(L) v, __VEC_T(L) min, __VEC_T(L) max); \
-    __VEC_T(L) __VEC_D(L, Min)(__VEC_T(L) v, __VEC_T(L) min);                   \
-    __VEC_T(L) __VEC_D(L, Max)(__VEC_T(L) v, __VEC_T(L) max);                   \
-    __VEC_T(L) __VEC_D(L, Lerp)(__VEC_T(L) v1, __VEC_T(L) v2, float n);
-VECTOR_TYPES
+#define X(L)                                                         \
+    typedef float __VEC_T(L) __attribute__((ext_vector_type(L)));    \
+    typedef int Vec##L##i __attribute__((ext_vector_type(L)));       \
+    __VEC_T(L)                                                       \
+    __VEC_D(L, Zero)(void);                                          \
+    void __VEC_D(L, Print)(__VEC_T(L) v);                            \
+    float __VEC_D(L, Sum)(__VEC_T(L) v);                             \
+    int __VEC_D(L, Equals)(__VEC_T(L) a, __VEC_T(L) b);              \
+    float __VEC_D(L, LengthSqr)(__VEC_T(L) v);                       \
+    float __VEC_D(L, Length)(__VEC_T(L) v);                          \
+    float __VEC_D(L, Dot)(__VEC_T(L) v1, __VEC_T(L) v2);             \
+    __VEC_T(L)                                                       \
+    __VEC_D(L, Normalize)(__VEC_T(L) v);                             \
+    float __VEC_D(L, DistSqr)(__VEC_T(L) v1, __VEC_T(L) v2);         \
+    float __VEC_D(L, Dist)(__VEC_T(L) v1, __VEC_T(L) v2);            \
+    __VEC_T(L)                                                       \
+    __VEC_D(L, Clamp)(__VEC_T(L) v, __VEC_T(L) min, __VEC_T(L) max); \
+    __VEC_T(L)                                                       \
+    __VEC_D(L, Min)(__VEC_T(L) v, __VEC_T(L) min);                   \
+    __VEC_T(L)                                                       \
+    __VEC_D(L, Max)(__VEC_T(L) v, __VEC_T(L) max);                   \
+    __VEC_T(L)                                                       \
+    __VEC_D(L, Lerp)(__VEC_T(L) v1, __VEC_T(L) v2, float n);
+    EZ_MATH_DEF
 #undef X
 
 #define Vec2New(X, Y) (Vec2f){(X), (Y)}
@@ -169,7 +172,7 @@ Vec3f QuaternionToEuler(Quaternion q);
 int QuaternionEquals(Quaternion p, Quaternion q);
 
 #if !defined(EZ_MATH_DISABLE_MATRIX)
-typedef Mat44 Matrix;
+typedef Mat4 Matrix;
 
 Vec3f Vec3Transform(Vec3f v, Matrix mat);
 Vec3f Vec3Unproject(Vec3f source, Matrix projection, Matrix view);
@@ -227,20 +230,22 @@ float EaseElasticIn(float t, float b, float c, float d);
 float EaseElasticOut(float t, float b, float c, float d);
 float EaseElasticInOut(float t, float b, float c, float d);
 
+typedef Vec2i Point;
+
 typedef struct {
     float x, y, w, h;
-} Box;
+} Rectangle;
 
 typedef struct {
     Vec2f position;
     float r;
 } Circle;
 
-int PointIntersectsBox(Vec2f p, Box b);
-int PointIntersectsCircle(Vec2f p, Circle c);
-int BoxIntersectsBox(Box a, Box b);
-int CircleIntersectsBox(Circle c, Box b);
-int CircleIntersectsCircle(Circle a, Circle b);
+int PointBoxIntersect(Vec2f p, Rectangle b);
+int PointCircleIntersect(Vec2f p, Circle c);
+int RectRectIntersect(Rectangle a, Rectangle b);
+int CircleRectIntersect(Circle c, Rectangle b);
+int CircleCircleIntersect(Circle a, Circle b);
 
 #if defined(__cplusplus)
 }
@@ -249,126 +254,142 @@ int CircleIntersectsCircle(Circle a, Circle b);
 
 #if defined(EZMATH_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
 #if !defined(EZ_MATH_DISABLE_MATRIX)
-#define X(W, H)                                                      \
-    __MATRIX_T(W, H) __MATRIX_D(W, H, Identity)(void)                \
-    {                                                                \
-        __MATRIX_T(W, H) m;                                          \
-        memset(&m, 0, sizeof(float) * W * H);                        \
-        if (W == H)                                                  \
-            for (int i = 0; i < W; i++)                              \
-                m[i][i] = 1.f;                                       \
-        return m;                                                    \
-    }                                                                \
-    float __MATRIX_D(W, H, TRACE)(__MATRIX_T(W, H) m)                \
-    {                                                                \
-        float r = 0.f;                                               \
-        if (W == H)                                                  \
-            for (int i = 0; i < W; i++)                              \
-                r += m[i][i];                                        \
-        return r;                                                    \
-    }                                                                \
-    __MATRIX_T(W, H) __MATRIX_D(W, H, Transpose)(__MATRIX_T(W, H) m) \
-    {                                                                \
-        __MATRIX_T(W, H) result = __MATRIX_D(W, H, Zero)();          \
-        for (int x = 0; x < W; x++)                                  \
-            for (int y = 0; y < H; y++)                              \
-                result[x][y] = m[y][x];                              \
-        return result;                                               \
-    }                                                                \
-    __MATRIX_T(W, H) __MATRIX_D(W, H, Zero)(void)                    \
-    {                                                                \
-        __MATRIX_T(W, H) m;                                          \
-        memset(&m, 0, sizeof(float) * W * H);                        \
-        return m;                                                    \
+#define X(N)                                    \
+    __MATRIX_T(N)                               \
+    __MATRIX_D(N, Identity)(void)               \
+    {                                           \
+        __MATRIX_T(N)                           \
+        m;                                      \
+        memset(&m, 0, sizeof(float) * (N * N)); \
+        for (int i = 0; i < N; i++)             \
+            m[i][i] = 1.f;                      \
+        return m;                               \
+    }                                           \
+    float __MATRIX_D(N, TRACE)(__MATRIX_T(N) m) \
+    {                                           \
+        float r = 0.f;                          \
+        for (int i = 0; i < N; i++)             \
+            r += m[i][i];                       \
+        return r;                               \
+    }                                           \
+    __MATRIX_T(N)                               \
+    __MATRIX_D(N, Transpose)(__MATRIX_T(N) m)   \
+    {                                           \
+        __MATRIX_T(N)                           \
+        result = __MATRIX_D(N, Zero)();         \
+        for (int x = 0; x < N; x++)             \
+            for (int y = 0; y < N; y++)         \
+                result[x][y] = m[y][x];         \
+        return result;                          \
+    }                                           \
+    __MATRIX_T(N)                               \
+    __MATRIX_D(N, Zero)(void)                   \
+    {                                           \
+        __MATRIX_T(N)                           \
+        m;                                      \
+        memset(&m, 0, sizeof(float) * (N * N)); \
+        return m;                               \
     }
-MATRIX_TYPES
+EZ_MATH_DEF
 #undef X
 #endif
 
-#define X(L)                                                                   \
-    __VEC_T(L) __VEC_D(L, Zero)(void)                                          \
-    {                                                                          \
-        __VEC_T(L) v;                                                          \
-        memset(&v, 0, sizeof(float) * L);                                      \
-        return v;                                                              \
-    }                                                                          \
-    void __VEC_D(L, Print)(__VEC_T(L) v)                                       \
-    {                                                                          \
-        puts("{ ");                                                            \
-        for (int i = 0; i < L; i++)                                            \
-            printf("%f ", v[i]);                                               \
-        puts("}");                                                             \
-    }                                                                          \
-    float __VEC_D(L, Sum)(__VEC_T(L) v)                                        \
-    {                                                                          \
-        float r = 0.f;                                                         \
-        for (int i = 0; i < L; i++)                                            \
-            r += v[i];                                                         \
-        return r;                                                              \
-    }                                                                          \
-    int __VEC_D(L, Equals)(__VEC_T(L) a, __VEC_T(L) b)                         \
-    {                                                                          \
-        int r = 1;                                                             \
-        for (int i = 0; i < L; i++)                                            \
-            if (!FLT_CMP(a[i], b[i]))                                          \
-                return 0;                                                      \
-        return r;                                                              \
-    }                                                                          \
-    float __VEC_D(L, LengthSqr)(__VEC_T(L) v)                                  \
-    {                                                                          \
-        return __VEC_D(L, Sum)(v * v);                                         \
-    }                                                                          \
-    float __VEC_D(L, Length)(__VEC_T(L) v)                                     \
-    {                                                                          \
-        return sqrtf(__VEC_D(L, LengthSqr)(v));                                \
-    }                                                                          \
-    float __VEC_D(L, Dot)(__VEC_T(L) v1, __VEC_T(L) v2)                        \
-    {                                                                          \
-        return __VEC_D(L, Sum)(v1 * v2);                                       \
-    }                                                                          \
-    __VEC_T(L) __VEC_D(L, Normalize) (__VEC_T(L) v)                            \
-    {                                                                          \
-        __VEC_T(L) r = {0};                                                    \
-        float l = __VEC_D(L, Length)(v);                                       \
-        for (int i = 0; i < L; i++)                                            \
-            r[i] = v[i] * (1.f / l);                                           \
-        return r;                                                              \
-    }                                                                          \
-    float __VEC_D(L, DistSqr)(__VEC_T(L) v1, __VEC_T(L) v2)                    \
-    {                                                                          \
-        __VEC_T(L) v = v2 - v1;                                                \
-        return __VEC_D(L, Sum)(v * v);                                         \
-    }                                                                          \
-    float __VEC_D(L, Dist)(__VEC_T(L) v1, __VEC_T(L) v2)                       \
-    {                                                                          \
-        return sqrtf(__VEC_D(L, DistSqr)(v1, v2));                             \
-    }                                                                          \
-    __VEC_T(L) __VEC_D(L, Clamp)(__VEC_T(L) v, __VEC_T(L) min, __VEC_T(L) max) \
-    {                                                                          \
-    __VEC_T(L) r = {0};                                                        \
-        for (int i = 0; i < L; i++)                                            \
-            r[i] = CLAMP(v[i], min[i], max[i]);                                \
-        return r;                                                              \
-    }                                                                          \
-    __VEC_T(L) __VEC_D(L, Min)(__VEC_T(L) v, __VEC_T(L) min)                   \
-    {                                                                          \
-    __VEC_T(L) r = {0};                                                        \
-        for (int i = 0; i < L; i++)                                            \
-            r[i] = MIN(v[i], min[i]);                                          \
-        return r;                                                              \
-    }                                                                          \
-    __VEC_T(L) __VEC_D(L, Max)(__VEC_T(L) v, __VEC_T(L) max)                   \
-    {                                                                          \
-    __VEC_T(L) r = {0};                                                        \
-        for (int i = 0; i < L; i++)                                            \
-            r[i] = MAX(v[i], max[i]);                                          \
-        return r;                                                              \
-    }                                                                          \
-    __VEC_T(L) __VEC_D(L, Lerp)(__VEC_T(L) v1, __VEC_T(L) v2, float n)         \
-    {                                                                          \
-        return v1 + n * (v2 - v1);                                             \
+#define X(L)                                                        \
+    __VEC_T(L)                                                      \
+    __VEC_D(L, Zero)(void)                                          \
+    {                                                               \
+        __VEC_T(L)                                                  \
+        v;                                                          \
+        memset(&v, 0, sizeof(float) * L);                           \
+        return v;                                                   \
+    }                                                               \
+    void __VEC_D(L, Print)(__VEC_T(L) v)                            \
+    {                                                               \
+        puts("{ ");                                                 \
+        for (int i = 0; i < L; i++)                                 \
+            printf("%f ", v[i]);                                    \
+        puts("}");                                                  \
+    }                                                               \
+    float __VEC_D(L, Sum)(__VEC_T(L) v)                             \
+    {                                                               \
+        float r = 0.f;                                              \
+        for (int i = 0; i < L; i++)                                 \
+            r += v[i];                                              \
+        return r;                                                   \
+    }                                                               \
+    int __VEC_D(L, Equals)(__VEC_T(L) a, __VEC_T(L) b)              \
+    {                                                               \
+        int r = 1;                                                  \
+        for (int i = 0; i < L; i++)                                 \
+            if (!FLT_CMP(a[i], b[i]))                               \
+                return 0;                                           \
+        return r;                                                   \
+    }                                                               \
+    float __VEC_D(L, LengthSqr)(__VEC_T(L) v)                       \
+    {                                                               \
+        return __VEC_D(L, Sum)(v * v);                              \
+    }                                                               \
+    float __VEC_D(L, Length)(__VEC_T(L) v)                          \
+    {                                                               \
+        return sqrtf(__VEC_D(L, LengthSqr)(v));                     \
+    }                                                               \
+    float __VEC_D(L, Dot)(__VEC_T(L) v1, __VEC_T(L) v2)             \
+    {                                                               \
+        return __VEC_D(L, Sum)(v1 * v2);                            \
+    }                                                               \
+    __VEC_T(L)                                                      \
+    __VEC_D(L, Normalize)(__VEC_T(L) v)                             \
+    {                                                               \
+        __VEC_T(L)                                                  \
+        r = {0};                                                    \
+        float l = __VEC_D(L, Length)(v);                            \
+        for (int i = 0; i < L; i++)                                 \
+            r[i] = v[i] * (1.f / l);                                \
+        return r;                                                   \
+    }                                                               \
+    float __VEC_D(L, DistSqr)(__VEC_T(L) v1, __VEC_T(L) v2)         \
+    {                                                               \
+        __VEC_T(L)                                                  \
+        v = v2 - v1;                                                \
+        return __VEC_D(L, Sum)(v * v);                              \
+    }                                                               \
+    float __VEC_D(L, Dist)(__VEC_T(L) v1, __VEC_T(L) v2)            \
+    {                                                               \
+        return sqrtf(__VEC_D(L, DistSqr)(v1, v2));                  \
+    }                                                               \
+    __VEC_T(L)                                                      \
+    __VEC_D(L, Clamp)(__VEC_T(L) v, __VEC_T(L) min, __VEC_T(L) max) \
+    {                                                               \
+        __VEC_T(L)                                                  \
+        r = {0};                                                    \
+        for (int i = 0; i < L; i++)                                 \
+            r[i] = CLAMP(v[i], min[i], max[i]);                     \
+        return r;                                                   \
+    }                                                               \
+    __VEC_T(L)                                                      \
+    __VEC_D(L, Min)(__VEC_T(L) v, __VEC_T(L) min)                   \
+    {                                                               \
+        __VEC_T(L)                                                  \
+        r = {0};                                                    \
+        for (int i = 0; i < L; i++)                                 \
+            r[i] = MIN(v[i], min[i]);                               \
+        return r;                                                   \
+    }                                                               \
+    __VEC_T(L)                                                      \
+    __VEC_D(L, Max)(__VEC_T(L) v, __VEC_T(L) max)                   \
+    {                                                               \
+        __VEC_T(L)                                                  \
+        r = {0};                                                    \
+        for (int i = 0; i < L; i++)                                 \
+            r[i] = MAX(v[i], max[i]);                               \
+        return r;                                                   \
+    }                                                               \
+    __VEC_T(L)                                                      \
+    __VEC_D(L, Lerp)(__VEC_T(L) v1, __VEC_T(L) v2, float n)         \
+    {                                                               \
+        return v1 + n * (v2 - v1);                                  \
     }
-VECTOR_TYPES
+EZ_MATH_DEF
 #undef X
 
 float Vec2Angle(Vec2f v1, Vec2f v2) {
@@ -583,7 +604,7 @@ Matrix QuaternionToMatrix(Quaternion q) {
     float bd = q.w*q.y;
     float cd = q.w*q.z;
 
-    Matrix result = Mat44Identity();
+    Matrix result = Mat4Identity();
     result[0][0] = 1 - 2*(b2 + c2);
     result[1][0] = 2*(ab + cd);
     result[2][0] = 2*(ac - bd);
@@ -692,7 +713,7 @@ Matrix MatrixInvert(Matrix mat) {
     float b11 = mat[2][2]*mat[3][3] - mat[3][2]*mat[2][3];
     float invDet = 1.0f/(b00*b11 - b01*b10 + b02*b09 + b03*b08 - b04*b07 + b05*b06);
 
-    Matrix result = Mat44Zero();
+    Matrix result = Mat4Zero();
     result[0][0] = (mat[1][1]*b11 - mat[2][1]*b10 + mat[3][1]*b09)*invDet;
     result[1][0] = (-mat[1][0]*b11 + mat[2][0]*b10 - mat[3][0]*b09)*invDet;
     result[2][0] = (mat[1][3]*b05 - mat[2][3]*b04 + mat[3][3]*b03)*invDet;
@@ -713,7 +734,7 @@ Matrix MatrixInvert(Matrix mat) {
 }
 
 Matrix MatrixTranslation(Vec3f v) {
-    Matrix result = Mat44Identity();
+    Matrix result = Mat4Identity();
     result[0][3] = v.x;
     result[1][3] = v.y;
     result[2][3] = v.z;
@@ -726,7 +747,7 @@ Matrix MatrixRotation(Vec3f axis, float angle) {
     float c = cosf(angle);
     float t = 1.f - c;
 
-    Matrix result = Mat44Identity();
+    Matrix result = Mat4Identity();
     result[0][0] = a.x*a.x*t + c;
     result[1][0] = a.y*a.x*t + a.z*s;
     result[2][0] = a.z*a.x*t - a.y*s;
@@ -740,7 +761,7 @@ Matrix MatrixRotation(Vec3f axis, float angle) {
 }
 
 Matrix MatrixScaling(Vec3f scale) {
-    Matrix result = Mat44Zero();
+    Matrix result = Mat4Zero();
     result[0][0] = scale.x;
     result[1][1] = scale.y;
     result[2][2] = scale.z;
@@ -753,7 +774,7 @@ Matrix MatrixFrustum(float left, float right, float bottom, float top, float nea
     float tb = top - bottom;
     float fn = far - near;
 
-    Matrix result = Mat44Zero();
+    Matrix result = Mat4Zero();
     result[0][0] = (near*2.0f)/rl;
     result[1][1] = (near*2.0f)/tb;
     result[0][2] = (right + left)/rl;
@@ -773,7 +794,7 @@ Matrix MatrixPerspective(float fovY, float aspect, float nearPlane, float farPla
     float tb = top - bottom;
     float fn = farPlane - nearPlane;
 
-    Matrix result = Mat44Zero();
+    Matrix result = Mat4Zero();
     result[0][0] = (nearPlane*2.0f)/rl;
     result[1][1] = (nearPlane*2.0f)/tb;
     result[0][2] = (right + left)/rl;
@@ -789,7 +810,7 @@ Matrix MatrixOrtho(float left, float right, float bottom, float top, float nearP
     float tb = top - bottom;
     float fn = farPlane - nearPlane;
 
-    Matrix result = Mat44Zero();
+    Matrix result = Mat4Zero();
     result[0][0] = 2.0f/rl;
     result[1][1] = 2.0f/tb;
     result[2][2] = -2.0f/fn;
@@ -805,7 +826,7 @@ Matrix MatrixLookAt(Vec3f eye, Vec3f target, Vec3f up) {
     Vec3f vx = Vec3Normalize(Vec3Cross(up, vz));
     Vec3f vy = Vec3Cross(vz, vx);
 
-    Matrix result = Mat44Zero();
+    Matrix result = Mat4Zero();
     result[0][0] = vx.x;
     result[1][0] = vy.x;
     result[2][0] = vz.x;
@@ -1018,25 +1039,25 @@ float EaseElasticInOut(float t, float b, float c, float d) {
     return (postFix * sinf((t * d - s) * (2.0f * PI) / p) * 0.5f + c + b);
 }
 
-int PointIntersectsBox(Vec2f p, Box b) {
+int PointIntersectsBox(Vec2f p, Rectangle b) {
     return p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h;
 }
 
-int PointIntersectsCircle(Vec2f p, Circle c) {
+int PointCircleIntersect(Vec2f p, Circle c) {
     return (p.x - c.position.x) * (p.x - c.position.x) + (p.y - c.position.y) * (p.y - c.position.y) <= c.r * c.r;
 }
 
-int BoxIntersectsBox(Box a, Box b) {
+int RectRectIntersect(Rectangle a, Rectangle b) {
     return b.x <= a.x + a.w && b.x + b.w >= a.x && b.y <= a.y + a.h && b.y + b.h >= a.y;
 }
 
-int CircleIntersectsBox(Circle c, Box b) {
+int CircleRectIntersect(Circle c, Rectangle b) {
     Vec2f p = Vec2New(fmaxf(fminf(c.position.x, b.x + b.w), b.x),
                       fmaxf(fminf(c.position.y, b.y + b.h), b.y));
     return (c.position.x - p.x) * (c.position.x - p.x) + (c.position.y - p.y) * (c.position.y - p.y) <= c.r * c.r;
 }
 
-int CircleIntersectsCircle(Circle a, Circle b) {
+int CircleCircleIntersect(Circle a, Circle b) {
     float dx = a.position.x - b.position.x;
     float dy = a.position.y - b.position.y;
     return dx * dx + dy * dy <= (a.r + b.r) * (a.r + b.r);
