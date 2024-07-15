@@ -69,7 +69,7 @@ ezKeyMap* ezKeyMapNew(ezKeyMap *old, size_t capacity);
 int ezKeyMapSet(ezKeyMap *map, uint64_t key, void *value);
 void* ezKeyMapGet(ezKeyMap *map, uint64_t key);
 void* ezKeyMapDel(ezKeyMap *map, uint64_t key);
-int ezKeyMapEach(ezKeyMap *map, int(*callback)(ezKeyValuePair *pair, size_t, void*), void *userdata);
+int ezKeyMapEach(ezKeyMap *map, int(*callback)(ezKeyValuePair *pair, uint64_t, void*), void *userdata);
 void ezKeyMapDestroy(ezKeyMap *map);
 
 typedef ezKeyMap ezDictionary;
@@ -533,7 +533,7 @@ static imap_pair_t imap_iterate(imap_node_t *tree, imap_iter_t *iter, int restar
     return imap__pair_zero__;
 }
 
-int ezKeyMapEach(ezKeyMap *map, int(*callback)(ezKeyValuePair *pair, size_t, void*), void *userdata) {
+int ezKeyMapEach(ezKeyMap *map, int(*callback)(ezKeyValuePair *pair, uint64_t, void*), void *userdata) {
     imap_iter_t iter;
     imap_pair_t pair = imap_iterate(map->tree, &iter, 1);
     size_t i = 0;

@@ -20,7 +20,6 @@ These are for my personal use, however if you'd like to use any of these librari
 | **ezthreads.h**    | pthreads wrapper for windows + thread pool implementation     | **EZTHREADS_IMPLEMENTATION**   |
 | **ezvector.h**‡    | Stretchy buffer implementation                                | **EZVECTOR_IMPLEMENTATION**    |
 
-* **** Requires linking to external dependencies
 * **‡** Some functionality relies on clang+gcc extensions
 * **†** Work in progress, expect massive changes
 
