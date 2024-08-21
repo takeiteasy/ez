@@ -10,6 +10,7 @@ These are for my personal use, however if you'd like to use any of these librari
 | -----------------  | ------------------------------------------------------------- | ------------------------------ |
 | **ezarena.h**      | Simple memory arena implementation using mmap+VirtualAlloc    | **EZARENA_IMPLEMENTATION**     |
 | **ezclipboard.h**† | Get/set clipboard (text only) on Mac/Windows/Linux (GTK)      | **EZCLIPBOARD_IMPLEMENTATION** |
+| **ezecs.h**§      | Simple entity component system                                | **EZECS_IMPLEMENTATION**       |
 | **ezfs.h**†        | Common cross-platform file system functions                   | **EZFS_IMPLEMENTATION**        |
 | **ezhttp.h**†      | Simple embedded HTTP server                                   | **EZHTTP_IMPLEMENTATION**      |
 | **ezimage.h**      | Image manipulation, .png importing + exporting                | **EZIMAGE_IMPLEMENTATION**     |

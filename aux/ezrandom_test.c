@@ -4,9 +4,9 @@
 #include <assert.h>
 
 int main(int argc, const char *argv[]) {
-    ezRandom *a = ezRandomNew(500);
-    ezRandom *b = ezRandomNew(500);
-    ezRandom *c = ezRandomNew(100);
+    ezRng *a = ezRngNew(500);
+    ezRng *b = ezRngNew(500);
+    ezRng *c = ezRngNew(100);
     
     for (int i = 0; i < 100; i++) {
 #define TEST(TYPE, FN, FMT)                      \
@@ -17,13 +17,13 @@ do {                                             \
     assert(_a == _b && _a != _c && _b != _c);    \
     printf("%d: " FMT ", " FMT "\n", i, _a, _c); \
 } while(0)
-        TEST(unsigned int, ezRandomBits, "%d");
-        TEST(float, ezRandomFloat, "%f");
-        TEST(double, ezRandomDouble, "%f");
+        TEST(unsigned int, ezRngBits, "%d");
+        TEST(float, ezRngFloat, "%f");
+        TEST(double, ezRngDouble, "%f");
     }
     
-    ezRandomFree(a);
-    ezRandomFree(b);
-    ezRandomFree(c);
+    ezRngFree(a);
+    ezRngFree(b);
+    ezRngFree(c);
     return 0;
 }
