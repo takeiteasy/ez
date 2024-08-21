@@ -68,7 +68,6 @@ int main(int argc, const char * argv[]) {
     ParentStruct *parentC3 = ezMapGet(map, 3);
     assert(!parentC3);
     
-    ezMapClear(map, 1);
     ParentStruct *parentA3 = ezMapGet(map, 1);
     ParentStruct *parentB3 = ezMapGet(map, 2);
     assert(!parentA3);
