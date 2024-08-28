@@ -1,5 +1,5 @@
-/* ezthreads.h -- Wrapper over pthreads + Windows threds API w/ thread pool
- https://github.com/takeiteasy/
+/* ezthreads.h -- Wrapper over pthreads for windows + thread pool
+ https://github.com/takeiteasy/ez
  
  The MIT License (MIT)
 

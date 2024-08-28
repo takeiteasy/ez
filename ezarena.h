@@ -1,5 +1,5 @@
 /* ezarena.h - Arena memory storage pool
-   https://github.com/takeiteasy/
+   https://github.com/takeiteasy/ez
 
  The MIT License (MIT)
  
@@ -62,7 +62,6 @@ void ezArenaFree(ezArena *arena, void *memory);
 }
 #endif
 #endif // EZARENA_HEADER
-
 
 #if defined(EZARENA_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
 typedef ezArenaRegion Region;

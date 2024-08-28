@@ -1,5 +1,5 @@
 /* ezstack.h - Simple double linked-list implementation (WIP)
-   https://github.com/takeiteasy/
+   https://github.com/takeiteasy/ez
   
  The MIT License (MIT)
  

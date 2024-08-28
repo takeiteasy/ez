@@ -1,5 +1,5 @@
 /* ezmap.h - Simple key value map + dictionary 
-   https://github.com/takeiteasy/
+   https://github.com/takeiteasy/ez
   
  The MIT License (MIT)
  

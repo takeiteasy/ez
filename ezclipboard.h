@@ -1,5 +1,5 @@
 /* ezclipboard.h -- Cross-platform set/get text from/to clipboard
- https://github.com/takeiteasy/
+ https://github.com/takeiteasy/ez
  
  TODO:
  - Emscripten clipboard support

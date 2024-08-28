@@ -1,5 +1,5 @@
 /* ezrng.h - Simple pseudo random number generation
-   https://github.com/takeiteasy/
+   https://github.com/takeiteasy/ez
   
  The MIT License (MIT)
  

@@ -1,5 +1,5 @@
 /* ezimage.h - Image manipulation, importing + exporting
-   https://github.com/takeiteasy/
+   https://github.com/takeiteasy/ez
   
  Acknowledgements:
  
@@ -95,11 +95,13 @@ void ezImageDrawCircle(ezImage *img, int xc, int yc, int r, int col, int fill);
 void ezImageDrawRectangle(ezImage *img, int x, int y, int w, int h, int col, int fill);
 void ezImageDrawTriangle(ezImage *img, int x0, int y0, int x1, int y1, int x2, int y2, int col, int fill);
 
+#if !defined(EZIMAGE_DISABLE_TEXT)
 void ezImageDrawCharacter(ezImage *img, char c, int x, int y, int col);
 void ezImageDrawString(ezImage *img, const char *str, int x, int y, int col);
 void ezImageDrawStringFormat(ezImage *img, int x, int y, int col, const char *fmt, ...);
+#endif
 
-#if !defined(EZ_IMAGE_DISABLE_INOUT)
+#if !defined(EZIMAGE_DISABLE_IO)
 ezImage*  ezImageLoadFromPath(const char *path);
 ezImage*  ezImageLoadFromMemory(const void *data, size_t length);
 int ezImageSave(ezImage *img, const char *path);
@@ -499,6 +501,7 @@ void ezImageDrawTriangle(ezImage *img, int x0, int y0, int x1, int y1, int x2, i
     }
 }
 
+#if !defined(EZIMAGE_DISABLE_TEXT)
 #if !defined(_WIN32) && !defined(_WIN64)
 // Taken from: https://stackoverflow.com/a/4785411
 static int _vscprintf(const char *format, va_list pargs) {
@@ -671,8 +674,9 @@ void ezImageDrawStringFormat(ezImage *img, int x, int y, int col, const char *fm
     ezImageDrawString(img, str, x, y, col);
     EZ_FREE(str);
 }
+#endif // EZIMAGE_DISABLE_TEXT
 
-#if !defined(EZ_IMAGE_DISABLE_INOUT)
+#if !defined(EZIMAGE_DISABLE_IO)
 typedef struct {
     const unsigned char *p, *end;
 } PNG;
@@ -1380,5 +1384,5 @@ int ezImageSave(ezImage *img, const char *path) {
     fclose(out);
     return !err;
 }
-#endif // EZ_IMAGE_DISABLE_INOUT
+#endif // EZIMAGE_DISABLE_IO
 #endif // EZIMAGE_IMPLEMENTATION
