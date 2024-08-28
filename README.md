@@ -14,12 +14,14 @@ If you'd like to use any of these libraries, define ```EZ[NAME]_IMPLEMENTATION``
 | **ezimage.h**      | Image manipulation, .png importing + exporting                | To disable text-rendering define `EZIMAGE_DISABLE_TEXT` and to disable saving/loading define `EZIMAGE_DISABLE_IO` |
 | **ezmap.h**        | Simple key value map + dictionary                             | Some functionality relies on clang+gcc extensions, define `EZMAP_DISABLE_GENERICS` this removes the `ezMap` type |
 | **eznet.h**        | Simple cross-platform TCP+UDP network library                 | `WIP: Not finished do not use` |
-| **ezpoll.h**       | Very basic wrapper over epoll, kqueue and iocp                | `WIP: Not finished do not use` | 
+| **ezpoll.h**       | Very basic wrapper over epoll, kqueue and winsock2            | `WIP` Windows implementation relies on the C++ STL, other platforms are unaffected | 
 | **ezrng.h**        | Simple pseudo random number generation                        | None                           |
 | **ezstack.h**      | Simple double linked-list implementation                      | None                           |
 | **ezthreads.h**    | pthreads wrapper for windows + thread pool implementation     | The pthread wrapper for windows is only a partial implementation, not all of the pthread API is covered. Define `EZTHREAD_USE_NATIVE_CALL_ONCE` and `EZTHREAD_USE_NATIVE_CV` to enable native `call_once` and conditional vars support on windows |
-| **ezvector.h**     | Stretchy buffer implementation                                | Based off stretchy_buffer.h by Sean Barrett (nothings/sbt) |
+| **ezvector.h**     | Stretchy buffer implementation                                | None                           |
 
+> [!NOTE]
+> Any libraries or code used in these libraries are attributed at the head of each file
 
 ## LICENSE
 ```
