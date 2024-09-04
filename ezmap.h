@@ -118,6 +118,8 @@ typedef ezKeyMap ezMap;
 #if defined(EZMAP_IMPLEMENTATION) || defined(EZ_IMPLEMENTATION)
 #include <assert.h>
 
+#ifndef IMAP_IMPLEMENTATION
+#define IMAP_IMPLEMENTATION
 struct imap_node_t {
     union {
         uint32_t vec32[16];
@@ -328,17 +330,7 @@ static imap_node_t* imap_ensure(imap_node_t *tree, size_t capacity) {
     return newtree;
 }
 
-ezKeyMap* ezKeyMapNew(ezKeyMap *old, size_t capacity) {
-    ezKeyMap *result = EZ_MALLOC(sizeof(ezKeyMap));
-    if (!capacity)
-        capacity = EZMAP_DEFAULT_CAPACITY;
-    result->capacity = capacity;
-    result->count = 0;
-    result->tree = imap_ensure(NULL, capacity);
-    return result;
-}
-
-static uint32_t* find(ezKeyMap *map, uint64_t x, int ensure) {
+static uint32_t* imap_find(ezKeyMap *map, uint64_t x, int ensure) {
     uint32_t *slotstack[16 + 1];
     uint32_t posnstack[16 + 1];
     uint32_t stackp, stacki;
@@ -423,14 +415,6 @@ static void imap_setval64(imap_node_t *tree, uint32_t *slot, uint64_t y) {
     tree->vec64[sval >> imap__slot_shift__] = y;
 }
 
-int ezKeyMapSet(ezKeyMap *map, uint64_t key, void *item) {
-    uint32_t *slot = find(map, key, 1);
-    if (!slot)
-        return 0;
-    imap_setval64(map->tree, slot, (uint64_t)item);
-    return 1;
-}
-
 static uint64_t imap_getval(imap_node_t *tree, uint32_t *slot) {
     assert(!(*slot & imap__slot_node__));
     uint32_t sval = *slot;
@@ -438,11 +422,6 @@ static uint64_t imap_getval(imap_node_t *tree, uint32_t *slot) {
         return sval >> imap__slot_shift__;
     else
         return tree->vec64[sval >> imap__slot_shift__];
-}
-
-void* ezKeyMapGet(ezKeyMap *map, uint64_t key) {
-    uint32_t *slot = find(map, key, 0);
-    return slot ? (void*)imap_getval(map->tree, slot) : NULL;
 }
 
 static void imap_delval(imap_node_t *tree, uint32_t *slot) {
@@ -489,18 +468,6 @@ static void imap_remove(imap_node_t *tree, uint64_t x) {
     }
 }
 
-void* ezKeyMapDel(ezKeyMap *map, uint64_t key) {
-    if (!map->count)
-        return NULL;
-    uint32_t *slot = find(map, key, 0);
-    if (!slot)
-        return NULL;
-    void* val = (void*)imap_getval(map->tree, slot);
-    imap_remove(map->tree, key);
-    map->count--;
-    return val;
-}
-
 static imap_pair_t imap_iterate(imap_node_t *tree, imap_iter_t *iter, int restart) {
     imap_node_t *node;
     uint32_t *slot;
@@ -531,6 +498,43 @@ static imap_pair_t imap_iterate(imap_node_t *tree, imap_iter_t *iter, int restar
             return imap__pair__(imap__node_prefix__(node) | dirn, slot);
     }
     return imap__pair_zero__;
+}
+#endif // IMAP_IMPLEMENTATION
+
+ezKeyMap* ezKeyMapNew(ezKeyMap *old, size_t capacity) {
+    ezKeyMap *result = EZ_MALLOC(sizeof(ezKeyMap));
+    if (!capacity)
+        capacity = EZMAP_DEFAULT_CAPACITY;
+    result->capacity = capacity;
+    result->count = 0;
+    result->tree = imap_ensure(NULL, capacity);
+    return result;
+}
+
+int ezKeyMapSet(ezKeyMap *map, uint64_t key, void *item) {
+    uint32_t *slot = imap_find(map, key, 1);
+    if (!slot)
+        return 0;
+    imap_setval64(map->tree, slot, (uint64_t)item);
+    return 1;
+}
+
+
+void* ezKeyMapGet(ezKeyMap *map, uint64_t key) {
+    uint32_t *slot = imap_find(map, key, 0);
+    return slot ? (void*)imap_getval(map->tree, slot) : NULL;
+}
+
+void* ezKeyMapDel(ezKeyMap *map, uint64_t key) {
+    if (!map->count)
+        return NULL;
+    uint32_t *slot = imap_find(map, key, 0);
+    if (!slot)
+        return NULL;
+    void* val = (void*)imap_getval(map->tree, slot);
+    imap_remove(map->tree, key);
+    map->count--;
+    return val;
 }
 
 int ezKeyMapEach(ezKeyMap *map, int(*callback)(ezKeyValuePair *pair, uint64_t, void*), void *userdata) {
